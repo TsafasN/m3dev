@@ -1,6 +1,24 @@
 # Main Makefile
 RM := rm -rf
 
+# Help target should be first so it shows up when just typing make help
+help:
+	@echo "Available targets:"
+	@echo "  all              : Build the project (same as main-build)"
+	@echo "  main-build       : Build Template.elf and generate size/objdump outputs"
+	@echo "  clean            : Remove all build outputs and intermediate files"
+	@echo ""
+	@echo "Output files:"
+	@echo "  Template.elf     : The final executable"
+	@echo "  Template.map     : Memory map file"
+	@echo "  Template.list    : Disassembly listing"
+	@echo "  default.size.stdout : Size information of the executable"
+	@echo ""
+	@echo "Build options:"
+	@echo "  make -j          : Enable parallel build"
+	@echo "  make V=1         : Enable verbose output"
+	@echo ""
+
 ifneq ("$(wildcard sources.mk)","")
 -include sources.mk
 else

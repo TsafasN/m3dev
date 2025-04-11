@@ -34,3 +34,16 @@ CFLAGS = \
 -MT"$@" \
 -mfloat-abi=soft \
 -mthumb
+
+SFLAGS = \
+-mcpu=cortex-m3 \
+-g3 \
+-DDEBUG \
+-c \
+-x assembler-with-cpp \
+-MMD \
+-MP \
+-MF"$(@:%.o=%.d)" \
+-MT"$@" \
+-mfloat-abi=soft \
+-mthumb
