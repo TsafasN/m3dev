@@ -37,7 +37,7 @@ S_DEPS += \
 # $< refers to the first prerequisite (the .c file)
 # $@ refers to the target (.o file)
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.s $(BUILD_DIR)/subdir.mk
-	arm-none-eabi-gcc "$<" $(SFLAGS) -o "$@"
+	$(CC) $(SFLAGS) -o "$@" "$<"
 
 # Clean target that depends on the directory-specific clean
 clean: clean-Core-Startup
@@ -46,6 +46,8 @@ clean: clean-Core-Startup
 # Removes all generated files (.o, .d)
 clean-Core-Startup:
 	-$(RM) $(BUILD_DIR)/*.d $(BUILD_DIR)/*.o
+	@echo 'Cleaned object files'
+	@echo ' '
 
 # Mark clean target as .PHONY since it's not a real file
 .PHONY: clean-Core-Startup

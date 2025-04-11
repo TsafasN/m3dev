@@ -64,7 +64,7 @@ C_DEPS += \
 # $< refers to the first prerequisite (the .c file)
 # $@ refers to the target (.o file)
 $(BUILD_DIR)/%.o $(BUILD_DIR)/%.su: $(SRC_DIR)/%.c $(SRC_DIR)/subdir.mk
-	arm-none-eabi-gcc "$<" $(CFLAGS) -o "$@"
+	$(CC) "$<" $(CFLAGS) -o "$@"
 
 # Clean target that depends on the directory-specific clean
 clean: clean-Drivers
@@ -73,6 +73,8 @@ clean: clean-Drivers
 # Removes all generated files (.o, .d, .su)
 clean-Drivers:
 	-$(RM) $(BUILD_DIR)/*.d $(BUILD_DIR)/*.o $(BUILD_DIR)/*.su
+	@echo 'Cleaned object files'
+	@echo ' '
 
 # Mark clean target as .PHONY since it's not a real file
 .PHONY: clean-Drivers

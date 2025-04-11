@@ -21,7 +21,7 @@
 #   - Template.elf  	: Main executable
 #   - Template.map  	: Memory mapping file
 #   - Template.list 	: Disassembly listing
-#   - default.size 		: Size information
+#   - Template.size 	: Size information
 #
 # BUILD CONFIGURATION:
 #   - Toolchain    		: arm-none-eabi-gcc
@@ -50,13 +50,14 @@ help:
 	@echo "  Template.elf     : The final executable"
 	@echo "  Template.map     : Memory map file"
 	@echo "  Template.list    : Disassembly listing"
-	@echo "  default.size 	  : Size information of the executable"
+	@echo "  Template.size 	  : Size information of the executable"
 	@echo ""
 	@echo "Build options:"
 	@echo "  make -j          : Enable parallel build"
 	@echo "  make V=1         : Enable verbose output"
 	@echo ""
 
+# Include HAL driver sources, warn if not found
 ifneq ("$(wildcard sources.mk)","")
 -include sources.mk
 else
@@ -69,32 +70,35 @@ else
 $(warning "Warning: Drivers/STM32F1xx_HAL_Driver/Src/subdir.mk not found. Using default options.")
 endif
 
+# Include startup code, warn if not found
 ifneq ("$(wildcard Core/Startup/subdir.mk)","")
 -include Core/Startup/subdir.mk
 else
 $(warning "Warning: Core/Startup/subdir.mk not found. Using default options.")
 endif
 
+# Include core application sources, warn if not found
 ifneq ("$(wildcard Core/Src/subdir.mk)","")
 -include Core/Src/subdir.mk
 else
 $(warning "Warning: Core/Src/subdir.mk not found. Using default options.")
 endif
 
+# Include object file definitions, warn if not found
 ifneq ("$(wildcard objects.mk)","")
 -include objects.mk
 else
 $(warning "Warning: objects.mk not found. Using default options.")
 endif
 
+# Include build options, warn if not found
 ifneq ("$(wildcard options.mk)","")
 -include options.mk
 else
 $(warning "Warning: options.mk not found. Using default options.")
 endif
 
-RM := rm -rf
-
+# Include dependencies if not cleaning
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(strip $(S_DEPS)),)
 -include $(S_DEPS)
@@ -107,56 +111,83 @@ ifneq ($(strip $(C_DEPS)),)
 endif
 endif
 
--include ../makefile.defs
+# Configuration
+PROJECT_NAME 	:= Template
+MCU         	:= cortex-m3
+FLOAT_ABI   	:= soft
+LINKER_PATH 	:= /home/ntsafas/wd/m3dev/STM32F103RBTX_FLASH.ld
 
-OPTIONAL_TOOL_DEPS := \
-$(wildcard ../makefile.defs) \
-$(wildcard ../makefile.init) \
-$(wildcard ../makefile.targets) \
+# Define output files
+EXECUTABLES  	+= $(PROJECT_NAME).elf
+MAP_FILES  		+= $(PROJECT_NAME).map
+SIZE_OUTPUT 	+= $(PROJECT_NAME).size
+OBJDUMP_LIST 	+= $(PROJECT_NAME).list
 
-# Add inputs and outputs from these tool invocations to the build variables
-EXECUTABLES += \
-Template.elf \
+# Tool definitions
+CC      := arm-none-eabi-gcc
+OBJDUMP := arm-none-eabi-objdump
+SIZE    := arm-none-eabi-size
+RM      := rm -rf
 
-MAP_FILES += \
-Template.map \
+# # Build type (debug/release)
+# BUILD_TYPE ?= debug
 
-SIZE_OUTPUT += \
-default.size \
+# ifeq ($(BUILD_TYPE),debug)
+#     CFLAGS += -g3 -O0
+# else
+#     CFLAGS += -O2
+# endif
 
-OBJDUMP_LIST += \
-Template.list \
-
-
-# All Target
-all: main-build
+# Main build targets
+all: check-tools main-build
 
 # Main-build Target
-main-build: Template.elf secondary-outputs
+main-build: $(ELF) secondary-outputs
+	@echo "Build completed at: $$(date)"
+	@echo "Toolchain: $(CC)"
+	@echo "Build type: $(BUILD_TYPE)"
+	@echo ' '
 
-# Tool invocations
-Template.elf Template.map: $(OBJS) $(USER_OBJS) /home/ntsafas/wd/m3dev/STM32F103RBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Template.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"/home/ntsafas/wd/m3dev/STM32F103RBTX_FLASH.ld" -Wl,-Map="Template.map" -Wl,--gc-sections -static -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+# Link executable and generate map file
+Template.elf Template.map: $(OBJS) $(USER_OBJS) /home/ntsafas/wd/m3dev/STM32F103RBTX_FLASH.ld makefile objects.list
+	$(CC) -o "Template.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"/home/ntsafas/wd/m3dev/STM32F103RBTX_FLASH.ld" -Wl,-Map="Template.map" -Wl,--gc-sections -static -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
-default.size: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-size  $(EXECUTABLES) > "default.size"
+# Generate size information
+Template.size: $(EXECUTABLES) makefile objects.list
+	$(SIZE)  $(EXECUTABLES) > "Template.size"
 	@echo 'Finished building: $@'
 	@echo ' '
 
-Template.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "Template.list"
+# Generate disassembly listing
+Template.list: $(EXECUTABLES) makefile objects.list
+	$(OBJDUMP) -h -S $(EXECUTABLES) > "Template.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
-# Other Targets
+# Clean build artifacts
 clean:
-	-$(RM) Template.elf Template.list Template.map default.size
-	-@echo ' '
+	-$(RM) $(EXECUTABLES) $(OBJDUMP_LIST) $(MAP_FILES) $(SIZE_OUTPUT)
+	-@echo 'Cleaned output files'
+	@echo ' '
 
+# Generate secondary outputs
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
 
+version:
+	@$(CC) --version
+	@echo "Project: $(PROJECT_NAME)"
+	@echo "MCU: $(MCU)"
+	@echo "Build type: $(BUILD_TYPE)"
+
+# Check required tools
+check-tools:
+	@which $(CC) >/dev/null || (echo "Error: $(CC) not found"; exit 1)
+	@which $(OBJDUMP) >/dev/null || (echo "Error: $(OBJDUMP) not found"; exit 1)
+	@which $(SIZE) >/dev/null || (echo "Error: $(SIZE) not found"; exit 1)
+
+# Error handlers for linker script issues
 fail-specified-linker-script-missing:
 	@echo 'Error: Cannot find the specified linker script. Check the linker settings in the build configuration.'
 	@exit 2
@@ -164,6 +195,5 @@ fail-specified-linker-script-missing:
 warn-no-linker-script-specified:
 	@echo 'Warning: No linker script specified. Check the linker settings in the build configuration.'
 
-.PHONY: all clean dependents main-build fail-specified-linker-script-missing warn-no-linker-script-specified
-
--include ../makefile.targets
+# Define phony targets
+.PHONY: all clean version check-tools dependents main-build fail-specified-linker-script-missing warn-no-linker-script-specified
