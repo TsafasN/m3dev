@@ -1,24 +1,24 @@
-# Makefile for Core/Src
+# Core/Src Makefile
 #
 # This Makefile is responsible for managing the build process for the source files
-# located in the Core/Src directory. It includes rules for compiling source files,
-# generating object files, and cleaning up build artifacts.
+# located in the Core/Src directory.
+#
+# Generated Files:
+#   - *.o:   Object files
+#   - *.d:   Dependency files for make
+#   - *.su:  Size usage information
 #
 # Variables:
-# - SRC_DIR: Specifies the directory containing the source files.
-# - BUILD_DIR: Specifies the directory where the build artifacts (object files, dependency files) will be stored.
-# - C_SRCS: Automatically detects all C source files in the SRC_DIR.
-# - OBJS: A list of object files corresponding to the source files.
-# - C_DEPS: A list of dependency files corresponding to the source files.
+#   - SRC_DIR:  Source directory path
+#   - BUILD_DIR: Output directory path
+#   - C_SRCS:   List of C source files
+#   - OBJS:     List of object files to be generated
+#   - C_DEPS:   List of dependency files to be generated
 #
-# Rules:
-# - $(BUILD_DIR)/%.o $(BUILD_DIR)/%.su: Compiles each C source file into an object file (.o) and a supplementary file (.su).
-#   Uses the `arm-none-eabi-gcc` compiler with the specified CFLAGS.
+# Requirements:
+#   - arm-none-eabi-gcc toolchain must be in PATH
+#   - CFLAGS must be defined in parent makefile
 #
-# - clean: Removes all build artifacts (object files, dependency files, and supplementary files) in the BUILD_DIR.
-#   This is achieved through the `clean-Core-2f-Src` target.
-#
-# - clean-Core-2f-Src: A helper target for cleaning up build artifacts specific to the Core/Src directory.
 
 # Directory variables
 SRC_DIR := ../Core/Src
@@ -45,12 +45,12 @@ $(BUILD_DIR)/%.o $(BUILD_DIR)/%.su: $(SRC_DIR)/%.c $(BUILD_DIR)/subdir.mk
 	arm-none-eabi-gcc "$<" $(CFLAGS) -o "$@"
 
 # Clean target that depends on the directory-specific clean
-clean: clean-Core-2f-Src
+clean: clean-Core-Src
 
 # Directory-specific clean target
 # Removes all generated files (.o, .d, .su)
-clean-Core-2f-Src:
+clean-Core-Src:
 	-$(RM) $(BUILD_DIR)/*.d $(BUILD_DIR)/*.o $(BUILD_DIR)/*.su
 
 # Mark clean target as .PHONY since it's not a real file
-.PHONY: clean-Core-2f-Src
+.PHONY: clean-Core-Src

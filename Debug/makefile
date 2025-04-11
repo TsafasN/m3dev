@@ -1,5 +1,43 @@
-# Main Makefile
-RM := rm -rf
+# Project Makefile
+#
+# This makefile manages the build process for an STM32F103 microcontroller project.
+# It includes the following main features:
+#
+# BUILD TARGETS:
+#   - help     			: Displays available make targets and build options
+#   - all      			: Main build target (alias for main-build)
+#   - main-build		: Builds the Template.elf executable and secondary outputs
+#   - clean    			: Removes all build artifacts
+#
+# INCLUDED MAKEFILES:
+#   - sources.mk                              		: Source file definitions
+#   - Drivers/STM32F1xx_HAL_Driver/Src/subdir.mk 	: HAL driver sources
+#   - Core/Startup/subdir.mk                  		: Startup code
+#   - Core/Src/subdir.mk                      		: Core application sources
+#   - objects.mk                              		: Object file definitions
+#   - options.mk                              		: Build options
+#
+# OUTPUT FILES:
+#   - Template.elf  	: Main executable
+#   - Template.map  	: Memory mapping file
+#   - Template.list 	: Disassembly listing
+#   - default.size 		: Size information
+#
+# BUILD CONFIGURATION:
+#   - Toolchain    		: arm-none-eabi-gcc
+#   - Target MCU   		: STM32F103RB (Cortex-M3)
+#   - Float ABI    		: Soft
+#   - Linker Script		: STM32F103RBTX_FLASH.ld
+#
+# DEPENDENCIES:
+#   Automatically handles dependencies for .s, .c files and optional tool dependencies
+#
+# USAGE:
+#   make          		: Build the project
+#   make clean   	 	: Clean build artifacts
+#   make -j       		: Parallel build
+#   make V=1      		: Verbose output
+#
 
 # Help target should be first so it shows up when just typing make help
 help:
@@ -12,7 +50,7 @@ help:
 	@echo "  Template.elf     : The final executable"
 	@echo "  Template.map     : Memory map file"
 	@echo "  Template.list    : Disassembly listing"
-	@echo "  default.size.stdout : Size information of the executable"
+	@echo "  default.size 	  : Size information of the executable"
 	@echo ""
 	@echo "Build options:"
 	@echo "  make -j          : Enable parallel build"
@@ -55,6 +93,8 @@ else
 $(warning "Warning: options.mk not found. Using default options.")
 endif
 
+RM := rm -rf
+
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(strip $(S_DEPS)),)
 -include $(S_DEPS)
@@ -74,7 +114,7 @@ $(wildcard ../makefile.defs) \
 $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
-# Add inputs and outputs from these tool invocations to the build variables 
+# Add inputs and outputs from these tool invocations to the build variables
 EXECUTABLES += \
 Template.elf \
 
@@ -82,7 +122,7 @@ MAP_FILES += \
 Template.map \
 
 SIZE_OUTPUT += \
-default.size.stdout \
+default.size \
 
 OBJDUMP_LIST += \
 Template.list \
@@ -100,8 +140,8 @@ Template.elf Template.map: $(OBJS) $(USER_OBJS) /home/ntsafas/wd/m3dev/STM32F103
 	@echo 'Finished building target: $@'
 	@echo ' '
 
-default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-size  $(EXECUTABLES)
+default.size: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-size  $(EXECUTABLES) > "default.size"
 	@echo 'Finished building: $@'
 	@echo ' '
 
@@ -112,7 +152,7 @@ Template.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 
 # Other Targets
 clean:
-	-$(RM) Template.elf Template.list Template.map default.size.stdout
+	-$(RM) Template.elf Template.list Template.map default.size
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)

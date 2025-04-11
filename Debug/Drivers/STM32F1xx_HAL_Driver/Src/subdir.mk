@@ -1,4 +1,24 @@
-# Makefile for Drivers/STM32F1xx_HAL_Driver/Src
+# STM32F1xx Low-Layer (LL) Driver Makefile
+#
+# Description:
+#   This makefile handles the compilation of STM32F1xx LL driver source files.
+#
+# Generated Files:
+#   - *.o:   Object files
+#   - *.d:   Dependency files for make
+#   - *.su:  Size usage information
+#
+# Variables:
+#   - SRC_DIR:  Source directory path
+#   - BUILD_DIR: Output directory path
+#   - C_SRCS:   List of C source files
+#   - OBJS:     List of object files to be generated
+#   - C_DEPS:   List of dependency files to be generated
+#
+# Requirements:
+#   - arm-none-eabi-gcc toolchain must be in PATH
+#   - CFLAGS must be defined in parent makefile
+#
 
 # Directory variables
 SRC_DIR := ../Drivers/STM32F1xx_HAL_Driver/Src
@@ -47,12 +67,12 @@ $(BUILD_DIR)/%.o $(BUILD_DIR)/%.su: $(SRC_DIR)/%.c $(SRC_DIR)/subdir.mk
 	arm-none-eabi-gcc "$<" $(CFLAGS) -o "$@"
 
 # Clean target that depends on the directory-specific clean
-clean: clean-Drivers-2f-STM32F1xx_HAL_Driver-2f-Src
+clean: clean-Drivers
 
 # Directory-specific clean target
 # Removes all generated files (.o, .d, .su)
-clean-Drivers-2f-STM32F1xx_HAL_Driver-2f-Src:
+clean-Drivers:
 	-$(RM) $(BUILD_DIR)/*.d $(BUILD_DIR)/*.o $(BUILD_DIR)/*.su
 
 # Mark clean target as .PHONY since it's not a real file
-.PHONY: clean-Drivers-2f-STM32F1xx_HAL_Driver-2f-Src
+.PHONY: clean-Drivers

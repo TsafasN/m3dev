@@ -1,4 +1,23 @@
-# Makefile for Core/Startup
+# Core/Startup Makefile
+#
+# This makefile handles the compilation of startup assembly files for STM32F103RB
+# microcontroller.
+#
+# Generated Files:
+#   - *.o:   Object files
+#   - *.d:   Dependency files for make
+#
+# Variables:
+# - SRC_DIR:    Source directory containing assembly files
+# - BUILD_DIR:  Output directory for compiled files
+# - S_SRCS:     List of assembly source files (automatically detected)
+# - OBJS:       List of object files to be created
+# - S_DEPS:     List of dependency files
+#
+# Requirements:
+#   - arm-none-eabi-gcc toolchain must be in PATH
+#   - CFLAGS must be defined in parent makefile
+#
 
 # Directory variables
 SRC_DIR := ../Core/Startup
@@ -21,12 +40,12 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.s $(BUILD_DIR)/subdir.mk
 	arm-none-eabi-gcc "$<" $(SFLAGS) -o "$@"
 
 # Clean target that depends on the directory-specific clean
-clean: clean-Core-2f-Startup
+clean: clean-Core-Startup
 
 # Directory-specific clean target
-# Removes all generated files (.o, .d, .su)
-clean-Core-2f-Startup:
+# Removes all generated files (.o, .d)
+clean-Core-Startup:
 	-$(RM) $(BUILD_DIR)/*.d $(BUILD_DIR)/*.o
 
 # Mark clean target as .PHONY since it's not a real file
-.PHONY: clean-Core-2f-Startup
+.PHONY: clean-Core-Startup
