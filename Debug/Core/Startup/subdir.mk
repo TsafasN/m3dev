@@ -16,7 +16,7 @@
 #
 # Requirements:
 #   - arm-none-eabi-gcc toolchain must be in PATH
-#   - CFLAGS must be defined in parent makefile
+#   - SFLAGS must be defined in parent makefile
 #
 
 # Directory variables
@@ -46,7 +46,7 @@ clean: clean-Core-Startup
 # Removes all generated files (.o, .d)
 clean-Core-Startup:
 	-$(RM) $(BUILD_DIR)/*.d $(BUILD_DIR)/*.o
-	@echo 'Cleaned object files'
+	@echo 'Core/Startup: Cleaned object files'
 	@echo ' '
 
 # Mark clean target as .PHONY since it's not a real file

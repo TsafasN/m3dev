@@ -15,11 +15,15 @@
 #   - Process assembly with C preprocessor
 #   - Dependencies: Generate dependency files (.d)
 
+# Build type (debug/release)
+BUILD_TYPE ?= debug
+
 # CFLAGS: C compiler options
 CFLAGS = \
--mcpu=cortex-m3 \
+-mcpu=$(MCU) \
+-mthumb \
+-mfloat-abi=$(FLOAT_ABI) \
 -std=gnu11 \
--g3 \
 -DDEBUG \
 -DUSE_FULL_LL_DRIVER \
 -DHSE_VALUE=8000000 \
@@ -32,25 +36,35 @@ CFLAGS = \
 -DPREFETCH_ENABLE=1 \
 -DSTM32F103xB \
 -c \
--I../Core/Inc \
--I../Drivers/STM32F1xx_HAL_Driver/Inc \
--I../Drivers/CMSIS/Device/ST/STM32F1xx/Include \
--I../Drivers/CMSIS/Include \
--O0 \
+$(INCLUDES) \
 -ffunction-sections \
 -fdata-sections \
--Wall \
 -fstack-usage \
+-Wall \
 -MMD \
 -MP \
 -MF"$(@:%.o=%.d)" \
--MT"$@" \
--mfloat-abi=soft \
--mthumb
+-MT"$@"
+
+ifeq ($(BUILD_TYPE),debug)
+# Debug build settings
+CFLAGS += \
+-g3 \
+-O0 \
+-DDEBUG \
+-Wextra
+else
+# Release build settings
+CFLAGS += \
+-O2 \
+-DNDEBUG
+endif
 
 # SFLAGS: Assembly compiler options
 SFLAGS = \
--mcpu=cortex-m3 \
+-mcpu=$(MCU) \
+-mthumb \
+-mfloat-abi=$(FLOAT_ABI) \
 -g3 \
 -DDEBUG \
 -c \
@@ -58,6 +72,4 @@ SFLAGS = \
 -MMD \
 -MP \
 -MF"$(@:%.o=%.d)" \
--MT"$@" \
--mfloat-abi=soft \
--mthumb
+-MT"$@"

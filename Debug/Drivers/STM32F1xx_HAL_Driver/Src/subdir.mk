@@ -73,7 +73,7 @@ clean: clean-Drivers
 # Removes all generated files (.o, .d, .su)
 clean-Drivers:
 	-$(RM) $(BUILD_DIR)/*.d $(BUILD_DIR)/*.o $(BUILD_DIR)/*.su
-	@echo 'Cleaned object files'
+	@echo 'Drivers: Cleaned object files'
 	@echo ' '
 
 # Mark clean target as .PHONY since it's not a real file

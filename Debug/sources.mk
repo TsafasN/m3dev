@@ -19,7 +19,6 @@
 # - OBJS:            Object files
 # - MAP_FILES:       Memory map files
 # - S_DEPS:          Assembly dependencies
-# - S_UPPER_DEPS:    Upper case assembly dependencies
 # - C_DEPS:          C dependencies
 #
 # Subdirectories:
@@ -43,7 +42,6 @@ EXECUTABLES :=
 OBJS :=
 MAP_FILES :=
 S_DEPS :=
-S_UPPER_DEPS :=
 C_DEPS :=
 
 # Every subdirectory with source files must be described here

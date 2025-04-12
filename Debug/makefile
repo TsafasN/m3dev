@@ -57,13 +57,34 @@ help:
 	@echo "  make V=1         : Enable verbose output"
 	@echo ""
 
-# Include HAL driver sources, warn if not found
+# Configuration
+PROJECT_NAME 	:= Template
+MCU         	:= cortex-m3
+FLOAT_ABI   	:= soft
+LINKER_PATH 	:= /home/ntsafas/wd/m3dev/STM32F103RBTX_FLASH.ld
+
+# Include tools definitions
+ifneq ("$(wildcard tools.mk)","")
+-include tools.mk
+else
+$(error "Error: tools.mk not found. This file is required for build tools configuration.")
+endif
+
+# Include paths configuration
+ifneq ("$(wildcard includes.mk)","")
+-include includes.mk
+else
+$(warning "Warning: includes.mk not found. Using default include paths.")
+endif
+
+# Include Core sources, warn if not found
 ifneq ("$(wildcard sources.mk)","")
 -include sources.mk
 else
 $(warning "Warning: sources.mk not found. Using default options.")
 endif
 
+# Include HAL driver sources, warn if not found
 ifneq ("$(wildcard Drivers/STM32F1xx_HAL_Driver/Src/subdir.mk)","")
 -include Drivers/STM32F1xx_HAL_Driver/Src/subdir.mk
 else
@@ -103,40 +124,16 @@ ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(strip $(S_DEPS)),)
 -include $(S_DEPS)
 endif
-ifneq ($(strip $(S_UPPER_DEPS)),)
--include $(S_UPPER_DEPS)
-endif
 ifneq ($(strip $(C_DEPS)),)
 -include $(C_DEPS)
 endif
 endif
-
-# Configuration
-PROJECT_NAME 	:= Template
-MCU         	:= cortex-m3
-FLOAT_ABI   	:= soft
-LINKER_PATH 	:= /home/ntsafas/wd/m3dev/STM32F103RBTX_FLASH.ld
 
 # Define output files
 EXECUTABLES  	+= $(PROJECT_NAME).elf
 MAP_FILES  		+= $(PROJECT_NAME).map
 SIZE_OUTPUT 	+= $(PROJECT_NAME).size
 OBJDUMP_LIST 	+= $(PROJECT_NAME).list
-
-# Tool definitions
-CC      := arm-none-eabi-gcc
-OBJDUMP := arm-none-eabi-objdump
-SIZE    := arm-none-eabi-size
-RM      := rm -rf
-
-# # Build type (debug/release)
-# BUILD_TYPE ?= debug
-
-# ifeq ($(BUILD_TYPE),debug)
-#     CFLAGS += -g3 -O0
-# else
-#     CFLAGS += -O2
-# endif
 
 # Main build targets
 all: check-tools main-build
@@ -181,12 +178,6 @@ version:
 	@echo "MCU: $(MCU)"
 	@echo "Build type: $(BUILD_TYPE)"
 
-# Check required tools
-check-tools:
-	@which $(CC) >/dev/null || (echo "Error: $(CC) not found"; exit 1)
-	@which $(OBJDUMP) >/dev/null || (echo "Error: $(OBJDUMP) not found"; exit 1)
-	@which $(SIZE) >/dev/null || (echo "Error: $(SIZE) not found"; exit 1)
-
 # Error handlers for linker script issues
 fail-specified-linker-script-missing:
 	@echo 'Error: Cannot find the specified linker script. Check the linker settings in the build configuration.'
@@ -196,4 +187,4 @@ warn-no-linker-script-specified:
 	@echo 'Warning: No linker script specified. Check the linker settings in the build configuration.'
 
 # Define phony targets
-.PHONY: all clean version check-tools dependents main-build fail-specified-linker-script-missing warn-no-linker-script-specified
+.PHONY: all clean version dependents main-build fail-specified-linker-script-missing warn-no-linker-script-specified
