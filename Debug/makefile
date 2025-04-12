@@ -53,7 +53,7 @@ help:
 PROJECT_NAME	:= Template
 MCU				:= cortex-m3
 FLOAT_ABI		:= soft
-LINKER_SCRIPT	:= /home/ntsafas/wd/m3dev/STM32F103RBTX_FLASH.ld
+LINKER_SCRIPT	:= ../STM32F103RBTX_FLASH.ld
 
 # Include tools definitions
 ifneq ("$(wildcard tools.mk)","")
