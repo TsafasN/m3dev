@@ -27,10 +27,8 @@ BUILD_DIR := ./Core/Startup
 S_SRCS := $(wildcard $(SRC_DIR)/*.s)
 
 # Define output files
-OBJS += \
-./Core/Startup/startup_stm32f103rbtx.o
-S_DEPS += \
-./Core/Startup/startup_stm32f103rbtx.d
+OBJS += $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(S_SRCS))
+S_DEPS += $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.d,$(S_SRCS))
 
 # Rule to build object files from S sources
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.s $(BUILD_DIR)/subdir.mk

@@ -28,14 +28,8 @@ BUILD_DIR := ./Core/Src
 C_SRCS := $(wildcard $(SRC_DIR)/*.c)
 
 # Define output files
-OBJS += \
-./Core/Src/main.o \
-./Core/Src/stm32f1xx_it.o \
-./Core/Src/system_stm32f1xx.o
-C_DEPS += \
-./Core/Src/main.d \
-./Core/Src/stm32f1xx_it.d \
-./Core/Src/system_stm32f1xx.d
+OBJS += $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(C_SRCS))
+C_DEPS += $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.d,$(C_SRCS))
 
 # Rule to build object files from C sources
 $(BUILD_DIR)/%.o $(BUILD_DIR)/%.su: $(SRC_DIR)/%.c $(BUILD_DIR)/subdir.mk
