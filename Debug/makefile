@@ -14,20 +14,12 @@
 #   - Drivers/STM32F1xx_HAL_Driver/Src/subdir.mk 	: HAL driver sources
 #   - Core/Startup/subdir.mk                  		: Startup code
 #   - Core/Src/subdir.mk                      		: Core application sources
-#   - objects.mk                              		: Object file definitions
-#   - options.mk                              		: Build options
 #
 # OUTPUT FILES:
 #   - Template.elf  	: Main executable
 #   - Template.map  	: Memory mapping file
 #   - Template.list 	: Disassembly listing
 #   - Template.size 	: Size information
-#
-# BUILD CONFIGURATION:
-#   - Toolchain    		: arm-none-eabi-gcc
-#   - Target MCU   		: STM32F103RB (Cortex-M3)
-#   - Float ABI    		: Soft
-#   - Linker Script		: STM32F103RBTX_FLASH.ld
 #
 # DEPENDENCIES:
 #   Automatically handles dependencies for .s, .c files and optional tool dependencies
@@ -58,16 +50,21 @@ help:
 	@echo ""
 
 # Configuration
-PROJECT_NAME 	:= Template
-MCU         	:= cortex-m3
-FLOAT_ABI   	:= soft
-LINKER_PATH 	:= /home/ntsafas/wd/m3dev/STM32F103RBTX_FLASH.ld
+PROJECT_NAME	:= Template
+MCU				:= cortex-m3
+FLOAT_ABI		:= soft
+LINKER_SCRIPT	:= /home/ntsafas/wd/m3dev/STM32F103RBTX_FLASH.ld
 
 # Include tools definitions
 ifneq ("$(wildcard tools.mk)","")
 -include tools.mk
 else
-$(error "Error: tools.mk not found. This file is required for build tools configuration.")
+$(warning "Warning: tools.mk not found. Using default toolchain settings.")
+CC		:= arm-none-eabi-gcc
+LD		:= arm-none-eabi-ld
+SIZE	:= arm-none-eabi-size
+OBJDUMP	:= arm-none-eabi-objdump
+RM		:= rm -f
 endif
 
 # Include paths configuration
@@ -105,28 +102,11 @@ else
 $(warning "Warning: Core/Src/subdir.mk not found. Using default options.")
 endif
 
-# Include object file definitions, warn if not found
-ifneq ("$(wildcard objects.mk)","")
--include objects.mk
-else
-$(warning "Warning: objects.mk not found. Using default options.")
-endif
-
 # Include build options, warn if not found
 ifneq ("$(wildcard options.mk)","")
 -include options.mk
 else
 $(warning "Warning: options.mk not found. Using default options.")
-endif
-
-# Include dependencies if not cleaning
-ifneq ($(MAKECMDGOALS),clean)
-ifneq ($(strip $(S_DEPS)),)
--include $(S_DEPS)
-endif
-ifneq ($(strip $(C_DEPS)),)
--include $(C_DEPS)
-endif
 endif
 
 # Define output files
@@ -139,52 +119,38 @@ OBJDUMP_LIST 	+= $(PROJECT_NAME).list
 all: check-tools main-build
 
 # Main-build Target
-main-build: $(ELF) secondary-outputs
-	@echo "Build completed at: $$(date)"
-	@echo "Toolchain: $(CC)"
-	@echo "Build type: $(BUILD_TYPE)"
+main-build:	$(EXECUTABLES) $(MAP_FILES) $(SIZE_OUTPUT) $(OBJDUMP_LIST)
 	@echo ' '
-
-# Link executable and generate map file
-Template.elf Template.map: $(OBJS) $(USER_OBJS) /home/ntsafas/wd/m3dev/STM32F103RBTX_FLASH.ld makefile objects.list
-	$(CC) -o "Template.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"/home/ntsafas/wd/m3dev/STM32F103RBTX_FLASH.ld" -Wl,-Map="Template.map" -Wl,--gc-sections -static -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
-	@echo 'Finished building target: $@'
+	@echo "Build completed at: $$(date)"
+	@echo ' '
+	@echo "Project: $(PROJECT_NAME)"
+	@echo "MCU: $(MCU)"
+	@echo "Build type: $(BUILD_TYPE)"
+	@echo "Toolchain: $(CC)"
 	@echo ' '
 
 # Generate size information
-Template.size: $(EXECUTABLES) makefile objects.list
-	$(SIZE)  $(EXECUTABLES) > "Template.size"
+$(SIZE_OUTPUT): $(EXECUTABLES) $(OBJS)
+	$(SIZE)  $(EXECUTABLES) > $@
 	@echo 'Finished building: $@'
-	@echo ' '
 
 # Generate disassembly listing
-Template.list: $(EXECUTABLES) makefile objects.list
-	$(OBJDUMP) -h -S $(EXECUTABLES) > "Template.list"
+$(OBJDUMP_LIST): $(EXECUTABLES) $(OBJS)
+	$(OBJDUMP) -h -S $(EXECUTABLES) > $@
 	@echo 'Finished building: $@'
+
+# Link executable and generate map file
+$(EXECUTABLES) $(MAP_FILES): $(OBJS) $(LINKER_SCRIPT)
 	@echo ' '
+	@echo 'Building target: $@'
+	@echo 'Invoking: Linker script: $(LINKER_SCRIPT)'
+	$(CC) -o $(EXECUTABLES) $(OBJS) $(LDFLAGS)
+	@echo 'Finished building target: $@'
 
 # Clean build artifacts
 clean:
 	-$(RM) $(EXECUTABLES) $(OBJDUMP_LIST) $(MAP_FILES) $(SIZE_OUTPUT)
 	-@echo 'Cleaned output files'
-	@echo ' '
-
-# Generate secondary outputs
-secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
-
-version:
-	@$(CC) --version
-	@echo "Project: $(PROJECT_NAME)"
-	@echo "MCU: $(MCU)"
-	@echo "Build type: $(BUILD_TYPE)"
-
-# Error handlers for linker script issues
-fail-specified-linker-script-missing:
-	@echo 'Error: Cannot find the specified linker script. Check the linker settings in the build configuration.'
-	@exit 2
-
-warn-no-linker-script-specified:
-	@echo 'Warning: No linker script specified. Check the linker settings in the build configuration.'
 
 # Define phony targets
-.PHONY: all clean version dependents main-build fail-specified-linker-script-missing warn-no-linker-script-specified
+.PHONY: all clean dependents main-build

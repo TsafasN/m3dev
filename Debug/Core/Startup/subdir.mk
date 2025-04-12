@@ -8,11 +8,11 @@
 #   - *.d:   Dependency files for make
 #
 # Variables:
-# - SRC_DIR:    Source directory containing assembly files
-# - BUILD_DIR:  Output directory for compiled files
-# - S_SRCS:     List of assembly source files (automatically detected)
-# - OBJS:       List of object files to be created
-# - S_DEPS:     List of dependency files
+#   - SRC_DIR:  Source directory path
+#   - BUILD_DIR: Output directory path
+#   - C_SRCS:   List of C source files
+#   - OBJS:     List of object files to be generated
+#   - C_DEPS:   List of dependency files to be generated
 #
 # Requirements:
 #   - arm-none-eabi-gcc toolchain must be in PATH
@@ -26,16 +26,13 @@ BUILD_DIR := ./Core/Startup
 # Automatically find all source files
 S_SRCS := $(wildcard $(SRC_DIR)/*.s)
 
+# Define output files
 OBJS += \
 ./Core/Startup/startup_stm32f103rbtx.o
-
 S_DEPS += \
 ./Core/Startup/startup_stm32f103rbtx.d
 
-# Rule to build object files from C sources
-# Creates both .o and .su (size usage) files
-# $< refers to the first prerequisite (the .c file)
-# $@ refers to the target (.o file)
+# Rule to build object files from S sources
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.s $(BUILD_DIR)/subdir.mk
 	$(CC) $(SFLAGS) -o "$@" "$<"
 
@@ -43,11 +40,9 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.s $(BUILD_DIR)/subdir.mk
 clean: clean-Core-Startup
 
 # Directory-specific clean target
-# Removes all generated files (.o, .d)
+# Removes all generated files
 clean-Core-Startup:
 	-$(RM) $(BUILD_DIR)/*.d $(BUILD_DIR)/*.o
 	@echo 'Core/Startup: Cleaned object files'
-	@echo ' '
 
-# Mark clean target as .PHONY since it's not a real file
 .PHONY: clean-Core-Startup

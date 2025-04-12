@@ -27,6 +27,7 @@ BUILD_DIR := ./Drivers/STM32F1xx_HAL_Driver/Src
 # Automatically find all C source files
 C_SRCS := $(wildcard $(SRC_DIR)/*.c)
 
+# Define output files
 OBJS += \
 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_adc.o \
 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_crc.o \
@@ -42,7 +43,6 @@ OBJS += \
 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_tim.o \
 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_usart.o \
 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_utils.o
-
 C_DEPS += \
 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_adc.d \
 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_crc.d \
@@ -60,9 +60,6 @@ C_DEPS += \
 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_utils.d
 
 # Rule to build object files from C sources
-# Creates both .o and .su (size usage) files
-# $< refers to the first prerequisite (the .c file)
-# $@ refers to the target (.o file)
 $(BUILD_DIR)/%.o $(BUILD_DIR)/%.su: $(SRC_DIR)/%.c $(SRC_DIR)/subdir.mk
 	$(CC) "$<" $(CFLAGS) -o "$@"
 
@@ -70,11 +67,9 @@ $(BUILD_DIR)/%.o $(BUILD_DIR)/%.su: $(SRC_DIR)/%.c $(SRC_DIR)/subdir.mk
 clean: clean-Drivers
 
 # Directory-specific clean target
-# Removes all generated files (.o, .d, .su)
+# Removes all generated files
 clean-Drivers:
 	-$(RM) $(BUILD_DIR)/*.d $(BUILD_DIR)/*.o $(BUILD_DIR)/*.su
 	@echo 'Drivers: Cleaned object files'
-	@echo ' '
 
-# Mark clean target as .PHONY since it's not a real file
 .PHONY: clean-Drivers

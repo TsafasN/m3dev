@@ -1,21 +1,14 @@
 # Compiler and assembler options for STM32F103xB (Cortex-M3) microcontroller
 #
 # CFLAGS: C compiler options
-#   - CPU and architecture: Cortex-M3, Thumb instruction set, soft float ABI
-#   - Debug: Level 3 debug info, DEBUG symbol defined
-#   - MCU specific: STM32F103xB target, clock configurations, drivers
-#   - Optimization: None (O0), separate sections for functions and data
-#   - Warnings: Enable all warnings
-#   - Dependencies: Generate dependency files (.d)
-#   - Includes: Core, HAL drivers, and CMSIS paths
 #
 # SFLAGS: Assembly compiler options
-#   - CPU and architecture: Same as CFLAGS
-#   - Debug: Level 3 debug info, DEBUG symbol defined
-#   - Process assembly with C preprocessor
-#   - Dependencies: Generate dependency files (.d)
+#
+# LDFLAGS: Linker options
+#
 
 # Build type (debug/release)
+# If BUILD_TYPE wasn't defined yet, it will be set to debug
 BUILD_TYPE ?= debug
 
 # CFLAGS: C compiler options
@@ -73,3 +66,17 @@ SFLAGS = \
 -MP \
 -MF"$(@:%.o=%.d)" \
 -MT"$@"
+
+# Linker flags
+LDFLAGS = \
+-mcpu=cortex-m3 \
+-T$(LINKER_SCRIPT) \
+-Wl,-Map=$(MAP_FILES) \
+-Wl,--gc-sections \
+-static \
+-mfloat-abi=soft \
+-mthumb \
+-Wl,--start-group \
+-lc \
+-lm \
+-Wl,--end-group

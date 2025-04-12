@@ -27,20 +27,17 @@ BUILD_DIR := ./Core/Src
 # Automatically find all C source files
 C_SRCS := $(wildcard $(SRC_DIR)/*.c)
 
+# Define output files
 OBJS += \
 ./Core/Src/main.o \
 ./Core/Src/stm32f1xx_it.o \
 ./Core/Src/system_stm32f1xx.o
-
 C_DEPS += \
 ./Core/Src/main.d \
 ./Core/Src/stm32f1xx_it.d \
 ./Core/Src/system_stm32f1xx.d
 
 # Rule to build object files from C sources
-# Creates both .o and .su (size usage) files
-# $< refers to the first prerequisite (the .c file)
-# $@ refers to the target (.o file)
 $(BUILD_DIR)/%.o $(BUILD_DIR)/%.su: $(SRC_DIR)/%.c $(BUILD_DIR)/subdir.mk
 	$(CC) "$<" $(CFLAGS) -o "$@"
 
@@ -48,11 +45,9 @@ $(BUILD_DIR)/%.o $(BUILD_DIR)/%.su: $(SRC_DIR)/%.c $(BUILD_DIR)/subdir.mk
 clean: clean-Core-Src
 
 # Directory-specific clean target
-# Removes all generated files (.o, .d, .su)
+# Removes all generated files
 clean-Core-Src:
 	-$(RM) $(BUILD_DIR)/*.d $(BUILD_DIR)/*.o $(BUILD_DIR)/*.su
 	@echo 'Core/Src: Cleaned object files'
-	@echo ' '
 
-# Mark clean target as .PHONY since it's not a real file
 .PHONY: clean-Core-Src
