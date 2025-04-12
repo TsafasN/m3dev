@@ -14,6 +14,7 @@ Template.ioc
 *.elf
 *.hex
 *.map
+*.size
 *.lst
 *.list
 *.su

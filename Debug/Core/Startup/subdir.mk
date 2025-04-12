@@ -1,27 +1,46 @@
-################################################################################
-# Automatically-generated file. Do not edit!
-# Toolchain: GNU Tools for STM32 (13.3.rel1)
-################################################################################
+# Core/Startup Makefile
+#
+# This makefile handles the compilation of startup assembly files for STM32F103RB
+# microcontroller.
+#
+# Generated Files:
+#   - *.o:   Object files
+#   - *.d:   Dependency files for make
+#
+# Variables:
+#   - SRC_DIR:  Source directory path
+#   - BUILD_DIR: Output directory path
+#   - C_SRCS:   List of C source files
+#   - OBJS:     List of object files to be generated
+#   - C_DEPS:   List of dependency files to be generated
+#
+# Requirements:
+#   - arm-none-eabi-gcc toolchain must be in PATH
+#   - SFLAGS must be defined in parent makefile
+#
 
-# Add inputs and outputs from these tool invocations to the build variables 
-S_SRCS += \
-../Core/Startup/startup_stm32f103rbtx.s 
+# Directory variables
+SRC_DIR := ../Core/Startup
+BUILD_DIR := ./Core/Startup
 
-OBJS += \
-./Core/Startup/startup_stm32f103rbtx.o 
+# Automatically find all source files
+S_SRCS := $(wildcard $(SRC_DIR)/*.s)
 
-S_DEPS += \
-./Core/Startup/startup_stm32f103rbtx.d 
+# Define output files
+OBJS += $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(S_SRCS))
+S_DEPS += $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.d,$(S_SRCS))
 
+# Rule to build object files from S sources
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.s $(BUILD_DIR)/subdir.mk
+	$(CC) $(SFLAGS) -o "$@" "$<"
 
-# Each subdirectory must supply rules for building sources it contributes
-Core/Startup/%.o: ../Core/Startup/%.s Core/Startup/subdir.mk
-	arm-none-eabi-gcc -mcpu=cortex-m3 -g3 -DDEBUG -c -x assembler-with-cpp -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -mfloat-abi=soft -mthumb -o "$@" "$<"
+# Clean target that depends on the directory-specific clean
+clean: clean-Core-Startup
 
-clean: clean-Core-2f-Startup
+# Directory-specific clean target
+# Removes all generated files
+clean-Core-Startup:
+	-$(RM) $(BUILD_DIR)/*.d $(BUILD_DIR)/*.o
+	@echo 'Core/Startup: Cleaned object files'
 
-clean-Core-2f-Startup:
-	-$(RM) ./Core/Startup/startup_stm32f103rbtx.d ./Core/Startup/startup_stm32f103rbtx.o
-
-.PHONY: clean-Core-2f-Startup
-
+.PHONY: clean-Core-Startup

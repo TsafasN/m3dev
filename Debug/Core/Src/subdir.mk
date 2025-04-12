@@ -1,33 +1,47 @@
-# Makefile for Core/Src
+# Core/Src Makefile
+#
+# This Makefile is responsible for managing the build process for the source files
+# located in the Core/Src directory.
+#
+# Generated Files:
+#   - *.o:   Object files
+#   - *.d:   Dependency files for make
+#   - *.su:  Size usage information
+#
+# Variables:
+#   - SRC_DIR:  Source directory path
+#   - BUILD_DIR: Output directory path
+#   - C_SRCS:   List of C source files
+#   - OBJS:     List of object files to be generated
+#   - C_DEPS:   List of dependency files to be generated
+#
+# Requirements:
+#   - arm-none-eabi-gcc toolchain must be in PATH
+#   - CFLAGS must be defined in parent makefile
+#
 
-# Add inputs and outputs from these tool invocations to the build variables 
-C_SRCS += \
-../Core/Src/main.c \
-../Core/Src/stm32f1xx_it.c \
-../Core/Src/system_stm32f1xx.c
+# Directory variables
+SRC_DIR := ../Core/Src
+BUILD_DIR := ./Core/Src
 
-OBJS += \
-./Core/Src/main.o \
-./Core/Src/stm32f1xx_it.o \
-./Core/Src/system_stm32f1xx.o
+# Automatically find all C source files
+C_SRCS := $(wildcard $(SRC_DIR)/*.c)
 
-C_DEPS += \
-./Core/Src/main.d \
-./Core/Src/stm32f1xx_it.d \
-./Core/Src/system_stm32f1xx.d
+# Define output files
+OBJS += $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(C_SRCS))
+C_DEPS += $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.d,$(C_SRCS))
 
+# Rule to build object files from C sources
+$(BUILD_DIR)/%.o $(BUILD_DIR)/%.su: $(SRC_DIR)/%.c $(BUILD_DIR)/subdir.mk
+	$(CC) "$<" $(CFLAGS) -o "$@"
 
-# Each subdirectory must supply rules for building sources it contributes
-Core/Src/%.o Core/Src/%.su: ../Core/Src/%.c Core/Src/subdir.mk
-	arm-none-eabi-gcc \
-		"$<" \
-		$(CFLAGS) \
-		-o "$@"
+# Clean target that depends on the directory-specific clean
+clean: clean-Core-Src
 
-clean: clean-Core-2f-Src
+# Directory-specific clean target
+# Removes all generated files
+clean-Core-Src:
+	-$(RM) $(BUILD_DIR)/*.d $(BUILD_DIR)/*.o $(BUILD_DIR)/*.su
+	@echo 'Core/Src: Cleaned object files'
 
-clean-Core-2f-Src:
-	-$(RM) ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/main.su ./Core/Src/stm32f1xx_it.d ./Core/Src/stm32f1xx_it.o ./Core/Src/stm32f1xx_it.su ./Core/Src/system_stm32f1xx.d ./Core/Src/system_stm32f1xx.o ./Core/Src/system_stm32f1xx.su
-
-.PHONY: clean-Core-2f-Src
-
+.PHONY: clean-Core-Src
