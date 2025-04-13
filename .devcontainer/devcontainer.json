@@ -1,0 +1,48 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"allowComments": true,
+	"allowTrailingCommas": false,
+	"name": "${localWorkspaceFolderBasename} Dev Container",
+	"build": {
+		"dockerfile": "images/Dockerfile",
+		"args": {
+			"BASE_IMAGE": "ghcr.io/tsafasn/devcontainer:latest",
+			"USERNAME": "${localEnv:USER}"
+		}
+	},
+	"workspaceMount": "source=${localWorkspaceFolder},target=/workspace/${localWorkspaceFolderBasename},type=bind,consistency=cached",
+	"workspaceFolder": "/workspace/${localWorkspaceFolderBasename}",
+	// "mounts": [
+	// 	"source=${localEnv:HOME}/.ssh,target=/home/${localEnv:USER}/.ssh,type=bind,consistency=cached",
+	// 	"source=${localEnv:HOME}/.gitconfig,target=/home/${localEnv:USER}/.gitconfig,type=bind,consistency=cached",
+	// 	"source=${localEnv:HOME}/.bash_history,target=/home/${localEnv:USER}/.bash_history,type=bind,consistency=cached",
+	// 	"source=${localEnv:HOME}/.bashrc,target=/home/${localEnv:USER}/.bashrc,type=bind,consistency=cached"
+	// ],
+	// "initializeCommand": "./.devcontainer/scripts/initializeCommand.sh",
+	// "onCreateCommand": "./.devcontainer/scripts/onCreateCommand.sh",
+	// "postCreateCommand": "./.devcontainer/scripts/postCreateCommand.sh",
+	// "postStartCommand": "./.devcontainer/scripts/postStartCommand.sh",
+	// "postAttachCommand": "./.devcontainer/scripts/postAttachCommand.sh",
+	"remoteUser": "${localEnv:USER}",
+	"updateRemoteUserUID": true,
+	"updateRemoteUserGID": true,
+	"remoteEnv": {
+		"USER": "${localEnv:USER}",
+		"HOME": "/home/${localEnv:USER}",
+		"SSH_AUTH_SOCK": "/ssh-agent"
+	},
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"terminal.integrated.defaultProfile/linux": "bash",
+				"terminal.integrated.profiles.linux": {
+					"bash": {
+						"path": "/bin/bash"
+					}
+				},
+				"editor.tabSize": 4
+			}
+	  	}
+	}
+}
+  
