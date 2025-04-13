@@ -1,18 +1,35 @@
 # Wrapper to extend the base image
 
-# https://docs.docker.com/reference/dockerfile/#understand-how-arg-and-from-interact
-# FROM instructions support variables that are declared by any ARG instructions that occur before the first FROM
-ARG BASE_IMAGE
+# Base image
+ARG BASE_IMAGE=mcr.microsoft.com/devcontainers/base:ubuntu-22.04
 FROM ${BASE_IMAGE}
-# An ARG declared before a FROM is outside of a build stage, so it can't be used in any instruction after a FROM
-# To use the default value of an ARG declared before the first FROM use an ARG instruction without a value inside of a build stage
-ARG BASE_IMAGE
 
-ARG USERNAME
+# Default username (can be overridden during build)
+ARG USERNAME=vscode
 
+# Switch to root user
 USER root
 
-RUN groupmod --new-name "${USERNAME}" ubuntu &&\
-    usermod --login "${USERNAME}" --move-home --home "/home/${USERNAME}" ubuntu
+RUN groupmod --new-name "${USERNAME}" vscode && \
+    usermod --login "${USERNAME}" --move-home --home "/home/${USERNAME}" vscode
 
+# Install ARM toolchain and other dependencies as root
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends --no-install-suggests \
+        gcc-arm-none-eabi \
+        gdb-multiarch \
+        openocd \
+        make \
+        cmake \
+        git \
+        curl \
+        wget \
+        vim \
+        nano \
+        strace \
+        htop \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Switch to the new user
 USER "${USERNAME}"

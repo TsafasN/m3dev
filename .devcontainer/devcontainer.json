@@ -6,30 +6,29 @@
 	"build": {
 		"dockerfile": "images/Dockerfile",
 		"args": {
-			"BASE_IMAGE": "ghcr.io/tsafasn/devcontainer:latest",
+			"BASE_IMAGE": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
 			"USERNAME": "${localEnv:USER}"
 		}
 	},
 	"workspaceMount": "source=${localWorkspaceFolder},target=/workspace/${localWorkspaceFolderBasename},type=bind,consistency=cached",
 	"workspaceFolder": "/workspace/${localWorkspaceFolderBasename}",
-	// "mounts": [
-	// 	"source=${localEnv:HOME}/.ssh,target=/home/${localEnv:USER}/.ssh,type=bind,consistency=cached",
-	// 	"source=${localEnv:HOME}/.gitconfig,target=/home/${localEnv:USER}/.gitconfig,type=bind,consistency=cached",
-	// 	"source=${localEnv:HOME}/.bash_history,target=/home/${localEnv:USER}/.bash_history,type=bind,consistency=cached",
-	// 	"source=${localEnv:HOME}/.bashrc,target=/home/${localEnv:USER}/.bashrc,type=bind,consistency=cached"
-	// ],
-	// "initializeCommand": "./.devcontainer/scripts/initializeCommand.sh",
-	// "onCreateCommand": "./.devcontainer/scripts/onCreateCommand.sh",
-	// "postCreateCommand": "./.devcontainer/scripts/postCreateCommand.sh",
-	// "postStartCommand": "./.devcontainer/scripts/postStartCommand.sh",
-	// "postAttachCommand": "./.devcontainer/scripts/postAttachCommand.sh",
+	"mounts": [
+		"source=${localEnv:HOME}/.ssh,target=/home/${localEnv:USER}/.ssh,type=bind,consistency=cached",
+		"source=${localEnv:HOME}/.gitconfig,target=/home/${localEnv:USER}/.gitconfig,type=bind,consistency=cached",
+		"source=${localEnv:HOME}/.bash_history,target=/home/${localEnv:USER}/.bash_history,type=bind,consistency=cached",
+		"source=${localEnv:HOME}/.bashrc,target=/home/${localEnv:USER}/.bashrc,type=bind,consistency=cached"
+	],
+	"initializeCommand": "./.devcontainer/scripts/initializeCommand.sh",
+	"onCreateCommand": "./.devcontainer/scripts/onCreateCommand.sh",
+	"postCreateCommand": "./.devcontainer/scripts/postCreateCommand.sh",
+	"postStartCommand": "./.devcontainer/scripts/postStartCommand.sh",
+	"postAttachCommand": "./.devcontainer/scripts/postAttachCommand.sh",
 	"remoteUser": "${localEnv:USER}",
-	"updateRemoteUserUID": true,
-	"updateRemoteUserGID": true,
 	"remoteEnv": {
 		"USER": "${localEnv:USER}",
 		"HOME": "/home/${localEnv:USER}",
-		"SSH_AUTH_SOCK": "/ssh-agent"
+		"WORKSPACEFOLDERNAME": "${localWorkspaceFolderBasename}",
+		"WORKSPACEFOLDERPATH": "/workspace/${localWorkspaceFolder}"
 	},
 	"customizations": {
 		"vscode": {
@@ -45,4 +44,3 @@
 	  	}
 	}
 }
-  
