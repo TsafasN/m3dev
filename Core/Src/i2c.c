@@ -1,4 +1,6 @@
 #include "i2c.h"
+#include "stm32f1xx_ll_bus.h"
+#include "stm32f1xx_ll_gpio.h"
 #include "stdbool.h"
 #include "stdio.h"
 
@@ -66,8 +68,7 @@ static inline I2C_Result_t sInitI2CHandle(I2C_Instance_t I2Cx, I2C_Handle_t *pI2
     }
 }
 
-static inline I2C_Result_t sSetupI2CPins(I2C_Instance_t I2Cx)
-{
+static inline I2C_Result_t sSetupI2CPins(I2C_Instance_t I2Cx){
     /* Enable the peripheral clock of GPIOB */
     LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOB);
 

@@ -2,8 +2,6 @@
 #define __I2C_H
 
 #include "stm32f1xx_ll_i2c.h"
-#include "stm32f1xx_ll_bus.h"
-#include "stm32f1xx_ll_gpio.h"
 
 #define I2C_TIMEOUT     1000
 #define I2C_MAX_DELAY   0xFFFFFFFFU
@@ -14,6 +12,13 @@
 #define I2C_SCL_PIN     LL_GPIO_PIN_6
 #define I2C_SDA_PIN     LL_GPIO_PIN_7
 
+/**
+ * @brief Enumeration of I2C operation results
+ *
+ * This enumeration defines the possible results of I2C operations:
+ * - I2C_SUCCESS    Operation completed successfully
+ * - I2C_ERROR      Operation failed
+ */
 typedef enum {
     I2C_SUCCESS = 0x00,
     I2C_ERROR = 0x01
@@ -35,7 +40,14 @@ typedef I2C_TypeDef *   I2C_Instance_t;
  */
 typedef struct I2C_Handle_s I2C_Handle_t;
 
-/* Function prototypes */
+/**
+ * @brief  Initialize an I2C peripheral
+ * @param  I2Cx: I2C peripheral instance to be initialized
+ * @param  pI2CHandle: Pointer to I2C handle structure containing configuration settings
+ * @return I2C_Result_t: Status of initialization
+ *         - I2C_OK: Initialization successful
+ *         - I2C_ERROR: Initialization failed
+ */
 I2C_Result_t I2C_Init(I2C_Instance_t I2Cx, I2C_Handle_t *pI2CHandle);
 
 // ErrorStatus I2C_Write(I2C_TypeDef *I2Cx, uint16_t DevAddress, uint8_t *pData, uint16_t Size);
