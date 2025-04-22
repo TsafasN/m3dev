@@ -1,5 +1,8 @@
 #include "main.h"
 
+#include "stdio.h"
+#include "stdbool.h"
+
 void SystemClock_Config(void);
 
 int main(void)
@@ -13,6 +16,12 @@ int main(void)
 
     /* Configure the system clock */
     SystemClock_Config();
+
+    const I2C_Handle_t *cpI2CHandle = NULL;
+    if (I2C_Init(I2C1, cpI2CHandle) == I2C_ERROR)
+    {
+        Error_Handler();
+    }
 
     /* Infinite loop */
     while (1)
