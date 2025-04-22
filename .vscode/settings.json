@@ -1,0 +1,10 @@
+{
+    "editor.tabSize": 4,
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+    "files.trimTrailingWhitespace": true,
+    "files.associations": {
+        "stm32f1xx_ll_bus.h": "c",
+        "stm32f1xx_ll_gpio.h": "c"
+    },
+}

@@ -1,0 +1,57 @@
+{
+    "env": {
+        "commonIncludePath": [
+            "${workspaceFolder}/Core/Inc",
+            "${workspaceFolder}/Drivers/STM32F1xx_HAL_Driver/Inc",
+            "${workspaceFolder}/Drivers/CMSIS/Device/ST/STM32F1xx/Include",
+            "${workspaceFolder}/Drivers/CMSIS/Include",
+            // "/usr/lib/gcc/arm-none-eabi/10.3.1/include",
+            "/opt/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/13.2.1/include"
+        ],
+        "commonDefines": [
+            "DEBUG",
+            "USE_FULL_LL_DRIVER",
+            "HSE_VALUE=8000000",
+            "HSE_STARTUP_TIMEOUT=100",
+            "LSE_STARTUP_TIMEOUT=5000",
+            "LSE_VALUE=32768",
+            "HSI_VALUE=8000000",
+            "LSI_VALUE=40000",
+            "VDD_VALUE=3300",
+            "PREFETCH_ENABLE=1",
+            "STM32F103xB"
+        ],
+        "commonCompilerArgs": [
+            "-mcpu=cortex-m3",
+            "-mthumb",
+            "-mfloat-abi=soft",
+            "-ffunction-sections",
+            "-fdata-sections",
+            "-fstack-usage",
+            "-Wall",
+            "-MMD",
+            "-MP"
+        ]
+      },
+    "configurations": [
+        {
+            "name": "release",
+            "compilerPath": "/opt/gcc-arm-none-eabi/bin/arm-none-eabi-gcc",
+            "compilerArgs": ["${commonCompilerArgs}", "-O2"],
+            "cStandard": "c11",
+            "intelliSenseMode": "gcc-arm",
+            "defines": ["${commonDefines}", "NDEBUG"],
+            "includePath": ["${commonIncludePath}"]
+        },
+        {
+            "name": "debug",
+            "compilerPath": "/opt/gcc-arm-none-eabi/bin/arm-none-eabi-gcc",
+            "compilerArgs": ["${commonCompilerArgs}", "-O0", "-g3", "-Wextra"],
+            "cStandard": "c11",
+            "intelliSenseMode": "gcc-arm",
+            "defines": ["${commonDefines}", "DEBUG"],
+            "includePath": ["${commonIncludePath}"]
+        }
+    ],
+    "version": 4
+}
