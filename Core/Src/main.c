@@ -23,6 +23,8 @@ int main(void)
         Error_Handler();
     }
 
+    I2C_
+
     /* Infinite loop */
     while (1)
     {

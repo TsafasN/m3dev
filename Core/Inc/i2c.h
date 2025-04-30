@@ -50,8 +50,9 @@ typedef struct I2C_Handle_s I2C_Handle_t;
  */
 I2C_Result_t I2C_Init(I2C_Instance_t I2Cx, I2C_Handle_t *pI2CHandle);
 
-// ErrorStatus I2C_Write(I2C_TypeDef *I2Cx, uint16_t DevAddress, uint8_t *pData, uint16_t Size);
-// ErrorStatus I2C_Read(I2C_TypeDef *I2Cx, uint16_t DevAddress, uint8_t *pData, uint16_t Size);
+I2C_Result_t I2C_Write(I2C_Instance_t I2Cx, uint16_t DevAddress, uint8_t *pData, uint16_t Size);
+I2C_Result_t I2C_Read(I2C_Instance_t I2Cx, uint16_t DevAddress, uint8_t *pData, uint16_t Size);
+
 // ErrorStatus I2C_WriteRegister(I2C_TypeDef *I2Cx, uint16_t DevAddress, uint16_t MemAddress, uint8_t *pData, uint16_t Size);
 // ErrorStatus I2C_ReadRegister(I2C_TypeDef *I2Cx, uint16_t DevAddress, uint16_t MemAddress, uint8_t *pData, uint16_t Size);
 // void I2C_Error_Handler(void);
