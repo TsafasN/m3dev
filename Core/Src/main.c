@@ -17,8 +17,8 @@ int main(void)
     /* Configure the system clock */
     SystemClock_Config();
 
-    const I2C_Handle_t *cpI2CHandle = NULL;
-    if (I2C_Init(I2C1, cpI2CHandle) == I2C_ERROR)
+    const I2C_Handle_t *pI2CHandle = NULL;
+    if (I2C_Init(I2C1, pI2CHandle) == I2C_ERROR)
     {
         Error_Handler();
     }

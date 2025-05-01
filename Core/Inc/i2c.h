@@ -37,6 +37,13 @@ typedef I2C_TypeDef *   I2C_Instance_t;
 /**
  * @typedef I2C_Handle_t
  * @brief Typedef for I2C initialization handler
+ *
+ * This structure holds the initialization data and state for an I2C peripheral.
+ * It encapsulates the peripheral configuration parameters and tracks whether
+ * the peripheral has been initialized.
+ *
+ * @note This structure is used internally by the I2C driver
+ *       and should not be modified directly by the user.
  */
 typedef struct I2C_Handle_s I2C_Handle_t;
 
@@ -45,15 +52,21 @@ typedef struct I2C_Handle_s I2C_Handle_t;
  * @param  I2Cx: I2C peripheral instance to be initialized
  * @param  pI2CHandle: Pointer to I2C handle structure containing configuration settings
  * @return I2C_Result_t: Status of initialization
- *         - I2C_OK: Initialization successful
- *         - I2C_ERROR: Initialization failed
  */
-I2C_Result_t I2C_Init(I2C_Instance_t I2Cx, I2C_Handle_t *pI2CHandle);
+I2C_Result_t I2C_Init(const I2C_Instance_t I2Cx, const I2C_Handle_t *pI2CHandle);
 
-// ErrorStatus I2C_Write(I2C_TypeDef *I2Cx, uint16_t DevAddress, uint8_t *pData, uint16_t Size);
-// ErrorStatus I2C_Read(I2C_TypeDef *I2Cx, uint16_t DevAddress, uint8_t *pData, uint16_t Size);
-// ErrorStatus I2C_WriteRegister(I2C_TypeDef *I2Cx, uint16_t DevAddress, uint16_t MemAddress, uint8_t *pData, uint16_t Size);
-// ErrorStatus I2C_ReadRegister(I2C_TypeDef *I2Cx, uint16_t DevAddress, uint16_t MemAddress, uint8_t *pData, uint16_t Size);
-// void I2C_Error_Handler(void);
+I2C_Result_t I2C_Write_Polling(const I2C_Handle_t * const pI2CHandle, const uint16_t destAddress, const uint8_t * const pData, const uint16_t dataSize);
+I2C_Result_t I2C_Read_Polling(const I2C_Handle_t * const pI2CHandle, const uint16_t destAddress, uint8_t * const pData, const uint16_t dataSize);
+
+I2C_Result_t I2C_Write_Interrupt(const I2C_Handle_t * const pI2CHandle, const uint16_t destAddress, const uint8_t * const pData, const uint16_t dataSize);
+I2C_Result_t I2C_Read_Interrupt(const I2C_Handle_t * const pI2CHandle, const uint16_t destAddress, uint8_t * const pData, const uint16_t dataSize);
+
+I2C_Result_t I2C_Write_DMA(const I2C_Handle_t * const pI2CHandle, const uint16_t destAddress, const uint8_t * const pData, const uint16_t dataSize);
+I2C_Result_t I2C_Read_DMA(const I2C_Handle_t * const pI2CHandle, const uint16_t destAddress, uint8_t * const pData, const uint16_t dataSize);
+
+I2C_Result_t I2C_WriteRegister(I2C_Handle_t *pI2CHandle, uint16_t DevAddress, uint16_t MemAddress, uint8_t *pData, uint16_t Size);
+I2C_Result_t I2C_ReadRegister(I2C_Handle_t *pI2CHandle, uint16_t DevAddress, uint16_t MemAddress, uint8_t *pData, uint16_t Size);
+
+void I2C_Error_Handler(void);
 
 #endif /* __I2C_H */

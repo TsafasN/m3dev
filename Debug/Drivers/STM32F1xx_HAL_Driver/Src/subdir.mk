@@ -25,7 +25,21 @@ SRC_DIR := ../Drivers/STM32F1xx_HAL_Driver/Src
 BUILD_DIR := ./Drivers/STM32F1xx_HAL_Driver/Src
 
 # Automatically find all C source files
-C_SRCS := $(wildcard $(SRC_DIR)/*.c)
+C_SRCS += \
+../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_adc.c \
+../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_crc.c \
+../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_dac.c \
+../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_dma.c \
+../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_exti.c \
+../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_gpio.c \
+../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_i2c.c \
+../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_pwr.c \
+../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_rcc.c \
+../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_rtc.c \
+../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_spi.c \
+../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_tim.c \
+../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_usart.c \
+../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_ll_utils.c
 
 # Define output files
 OBJS += $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(C_SRCS))

@@ -9,8 +9,26 @@
  */
 #define I2C_SLAVE_OWN_ADDRESS   0x5A
 
+/**
+ * @brief Master Transfer Request Direction
+ */
+#define I2C_REQUEST_WRITE                       0x00
+#define I2C_REQUEST_READ                        0x01
+
+#define TX_BUFFER_SIZE_BYTES  100
+#define RX_BUFFER_SIZE_BYTES  100
+
+static uint8_t sTxBuf[TX_BUFFER_SIZE_BYTES] = {0x0};
+static uint8_t sRxBuf[RX_BUFFER_SIZE_BYTES] = {0x0};
+
+
+/**
+ * @brief Structure for managing I2C peripheral configuration and state
+ * @note  This structure is used internally by the I2C driver
+ */
 struct I2C_Handle_s {
     LL_I2C_InitTypeDef data;    /* I2C peripheral initialization structure */
+    I2C_Instance_t hwInstance;    /* Pointer to the I2C peripheral instance */
     bool isInitialized;         /* Flag to ensure initialization happens only once */
 };
 
@@ -52,6 +70,7 @@ static inline I2C_Result_t sInitI2CHandle(I2C_Instance_t I2Cx, I2C_Handle_t *pI2
             .TypeAcknowledge = LL_I2C_ACK,
             .OwnAddrSize     = LL_I2C_OWNADDRESS1_7BIT
         },
+        .hwInstance = I2C1,
         .isInitialized = false
     };
 
@@ -112,7 +131,7 @@ static inline I2C_Result_t sSetupI2CPeriph(I2C_Instance_t I2Cx, I2C_Handle_t *pI
     return I2C_SUCCESS;
 }
 
-I2C_Result_t I2C_Init(I2C_Instance_t I2Cx, I2C_Handle_t *pI2CHandle){
+I2C_Result_t I2C_Init(const I2C_Instance_t I2Cx, const I2C_Handle_t *pI2CHandle){
 
     if (sInitI2CHandle(I2Cx, pI2CHandle) == I2C_ERROR){
         return I2C_ERROR;
@@ -129,141 +148,109 @@ I2C_Result_t I2C_Init(I2C_Instance_t I2Cx, I2C_Handle_t *pI2CHandle){
     return I2C_SUCCESS;
 }
 
-// ErrorStatus I2C_Write(I2C_TypeDef *I2Cx, uint16_t DevAddress, uint8_t *pData, uint16_t Size){
-//     // Start the I2C transmission
-//     LL_I2C_GenerateStart(I2Cx);
+I2C_Result_t I2C_Write_Polling(const I2C_Handle_t * const pI2CHandle, const uint16_t destAddress, const uint8_t * const pData, const uint16_t dataSize){
+    /* Prepare acknowledge for Master data reception */
+    LL_I2C_AcknowledgeNextData(pI2CHandle->hwInstance, LL_I2C_ACK);
 
-//     // Wait for the start condition to be generated
-//     while (!LL_I2C_IsActiveFlag_SB(I2Cx));
+    /* Master Generate Start condition */
+    LL_I2C_GenerateStartCondition(pI2CHandle->hwInstance);
 
-//     // Send the device address
-//     LL_I2C_TransmitData8(I2Cx, DevAddress << 1);
+    /* Loop until Start Bit transmitted (SB flag raised) */
+    /* Wait for the start condition to be generated */
+    while (!LL_I2C_IsActiveFlag_SB(pI2CHandle->hwInstance));
 
-//     // Wait for the address to be acknowledged
-//     while (!LL_I2C_IsActiveFlag_ADDR(I2Cx));
+    /* Send Slave address for a write request */
+    LL_I2C_TransmitData8(pI2CHandle->hwInstance, destAddress | I2C_REQUEST_WRITE);
 
-//     // Clear the ADDR flag
-//     LL_I2C_ClearFlag_ADDR(I2Cx);
+    /* Loop until Address Acknowledgement received (ADDR flag raised) */
+    while (!LL_I2C_IsActiveFlag_ADDR(pI2CHandle->hwInstance));
 
-//     // Transmit data
-//     for (uint16_t i = 0; i < Size; i++) {
-//         LL_I2C_TransmitData8(I2Cx, pData[i]);
-//         while (!LL_I2C_IsActiveFlag_TXE(I2Cx));
-//     }
+    /* Clear the ADDR flag value in ISR register */
+    LL_I2C_ClearFlag_ADDR(pI2CHandle->hwInstance);
 
-//     // Generate stop condition
-//     LL_I2C_GenerateStop(I2Cx);
+    uint16_t dataSizeLeft = dataSize;
+    uint8_t *pDataIndex = (uint8_t)pData;
 
-//     return SUCCESS;
-// }
+    /* Loop until end of transfer (ubNbDataToTransmit == 0) */
+    while (dataSizeLeft > 0)
+    {
+        /* Loop until TXE flag is raised  */
+        while (!LL_I2C_IsActiveFlag_TXE(pI2CHandle->hwInstance));
 
-// ErrorStatus I2C_Read(I2C_TypeDef *I2Cx, uint16_t DevAddress, uint8_t *pData, uint16_t Size){
-//     // Start the I2C transmission
-//     LL_I2C_GenerateStart(I2Cx);
+        /* Write data in Transmit Data register. TXE flag is cleared by writing data in TXDR register */
+        LL_I2C_TransmitData8(pI2CHandle->hwInstance, *pDataIndex);
+        pDataIndex++;
+        dataSizeLeft--;
+    }
 
-//     // Wait for the start condition to be generated
-//     while (!LL_I2C_IsActiveFlag_SB(I2Cx));
+    /* End of transfer, Generate Stop condition */
+    LL_I2C_GenerateStopCondition(pI2CHandle->hwInstance);
 
-//     // Send the device address with read bit
-//     LL_I2C_TransmitData8(I2Cx, (DevAddress << 1) | 0x01);
+    return I2C_SUCCESS;
+}
 
-//     // Wait for the address to be acknowledged
-//     while (!LL_I2C_IsActiveFlag_ADDR(I2Cx));
+I2C_Result_t I2C_Read_Polling(const I2C_Handle_t * const pI2CHandle, const uint16_t destAddress, uint8_t * const pData, const uint16_t dataSize){
+    /* Prepare acknowledge for Slave address reception */
+    LL_I2C_AcknowledgeNextData(pI2CHandle->hwInstance, LL_I2C_ACK);
 
-//     // Clear the ADDR flag
-//     LL_I2C_ClearFlag_ADDR(I2Cx);
+    /* Wait ADDR flag and check address match code and direction */
+    while(!LL_I2C_IsActiveFlag_ADDR(pI2CHandle->hwInstance));
 
-//     // Receive data
-//     for (uint16_t i = 0; i < Size; i++) {
-//         while (!LL_I2C_IsActiveFlag_RXNE(I2Cx));
-//         pData[i] = LL_I2C_ReceiveData8(I2Cx);
-//     }
+    /* Verify the transfer direction, direction at Read enter receiver mode */
+    if(LL_I2C_GetTransferDirection(pI2CHandle->hwInstance) == LL_I2C_DIRECTION_READ)
+    {
+        /* Clear ADDR flag value in ISR register */
+        LL_I2C_ClearFlag_ADDR(pI2CHandle->hwInstance);
+    }
+    else
+    {
+        /* Clear ADDR flag value in ISR register */
+        LL_I2C_ClearFlag_ADDR(pI2CHandle->hwInstance);
 
-//     // Generate stop condition
-//     LL_I2C_GenerateStop(I2Cx);
+        return I2C_ERROR;
+    }
 
-//     return SUCCESS;
-// }
+    uint8_t dataReceiveIndex = 0;
 
-// ErrorStatus I2C_WriteRegister(I2C_TypeDef *I2Cx, uint16_t DevAddress, uint16_t MemAddress, uint8_t *pData, uint16_t Size){
-//     // Start the I2C transmission
-//     LL_I2C_GenerateStart(I2Cx);
+    /* Loop until end of transfer received (STOP flag raised) */
+    while(!LL_I2C_IsActiveFlag_STOP(pI2CHandle->hwInstance))
+    {
+        /* Check RXNE flag value in ISR register */
+        if(LL_I2C_IsActiveFlag_RXNE(pI2CHandle->hwInstance))
+        {
+            /* Read character in Receive Data register.
+            RXNE flag is cleared by reading data in DR register */
+            pData[dataReceiveIndex++] = LL_I2C_ReceiveData8(pI2CHandle->hwInstance);
+        }
 
-//     // Wait for the start condition to be generated
-//     while (!LL_I2C_IsActiveFlag_SB(I2Cx));
+        /* Check BTF flag value in ISR register */
+        if(LL_I2C_IsActiveFlag_BTF(pI2CHandle->hwInstance))
+        {
+            /* Read character in Receive Data register.
+            BTF flag is cleared by reading data in DR register */
+            pData[dataReceiveIndex++] = LL_I2C_ReceiveData8(pI2CHandle->hwInstance);
+        }
+    }
 
-//     // Send the device address with write bit
-//     LL_I2C_TransmitData8(I2Cx, DevAddress << 1);
+    /* Clear pending flags, Check Data consistency */
 
-//     // Wait for the address to be acknowledged
-//     while (!LL_I2C_IsActiveFlag_ADDR(I2Cx));
+    /* End of I2C_SlaveReceiver_MasterTransmitter_DMA Process */
+    LL_I2C_ClearFlag_STOP(I2C1);
 
-//     // Clear the ADDR flag
-//     LL_I2C_ClearFlag_ADDR(I2Cx);
+    /* Check if data request to turn on the LED2 */
+    if(Buffercmp8((uint8_t*)pData, (uint8_t*)sTxBuf, (dataReceiveIndex-1)) == 0)
+    {
+        /* Turn LED2 On:
+        *  - Expected bytes have been received
+        *  - Slave Rx sequence completed successfully
+        */
+        LED_On();
+    }
+    else
+    {
+        /* Call Error function */
+        Error_Callback();
+    }
 
-//     // Send the memory address
-//     LL_I2C_TransmitData8(I2Cx, MemAddress);
-
-//     // Wait for the data register to be empty
-//     while (!LL_I2C_IsActiveFlag_TXE(I2Cx));
-
-//     // Transmit data
-//     for (uint16_t i = 0; i < Size; i++) {
-//         LL_I2C_TransmitData8(I2Cx, pData[i]);
-//         while (!LL_I2C_IsActiveFlag_TXE(I2Cx));
-//     }
-
-//     // Generate stop condition
-//     LL_I2C_GenerateStop(I2Cx);
-
-//     return SUCCESS;
-// }
-
-// ErrorStatus I2C_ReadRegister(I2C_TypeDef *I2Cx, uint16_t DevAddress, uint16_t MemAddress, uint8_t *pData, uint16_t Size){
-//     // Start the I2C transmission
-//     LL_I2C_GenerateStart(I2Cx);
-
-//     // Wait for the start condition to be generated
-//     while (!LL_I2C_IsActiveFlag_SB(I2Cx));
-
-//     // Send the device address with write bit
-//     LL_I2C_TransmitData8(I2Cx, DevAddress << 1);
-
-//     // Wait for the address to be acknowledged
-//     while (!LL_I2C_IsActiveFlag_ADDR(I2Cx));
-
-//     // Clear the ADDR flag
-//     LL_I2C_ClearFlag_ADDR(I2Cx);
-
-//     // Send the memory address
-//     LL_I2C_TransmitData8(I2Cx, MemAddress);
-
-//     // Wait for the data register to be empty
-//     while (!LL_I2C_IsActiveFlag_TXE(I2Cx));
-
-//     // Generate repeated start condition
-//     LL_I2C_GenerateStart(I2Cx);
-
-//     // Wait for the start condition to be generated
-//     while (!LL_I2C_IsActiveFlag_SB(I2Cx));
-
-//     // Send the device address with read bit
-//     LL_I2C_TransmitData8(I2Cx, (DevAddress << 1) | 0x01);
-
-//     // Wait for the address to be acknowledged
-//     while (!LL_I2C_IsActiveFlag_ADDR(I2Cx));
-
-//     // Clear the ADDR flag
-//     LL_I2C_ClearFlag_ADDR(I2Cx);
-
-//     // Receive data
-//     for (uint16_t i = 0; i < Size; i++) {
-//         while (!LL_I2C_IsActiveFlag_RXNE(I2Cx));
-//         pData[i] = LL_I2C_ReceiveData8(I2Cx);
-//         if (i == Size - 1) {
-//             LL_I2C_GenerateStop(I2Cx);
-//         }
-//     }
-
-//     return SUCCESS;
-// }
+    return I2C_SUCCESS;
+}
