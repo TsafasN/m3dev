@@ -1,5 +1,6 @@
 #include "main.h"
 #include "stm32f1xx_it.h"
+#include "stm32f1xx_ll_i2c.h"
 
 
 /******************************************************************************/
@@ -92,13 +93,6 @@ void SysTick_Handler(void)
 
 }
 
-/******************************************************************************/
-/* STM32F1xx Peripheral Interrupt Handlers                                    */
-/* Add here the Interrupt Handlers for the used peripherals.                  */
-/* For the available peripheral interrupt handler names,                      */
-/* please refer to the startup file (startup_stm32f1xx.s).                    */
-/******************************************************************************/
-
 /**
     * @brief This function handles EXTI line[15:10] interrupts.
     */
@@ -107,5 +101,57 @@ void EXTI15_10_IRQHandler(void)
     if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_13) != RESET)
     {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_13);
+
+        /* Manage code in main.c.*/
+        UserButton_Callback();
     }
 }
+
+ void I2C2_EV_IRQHandler(void)
+ {
+    /* Check ADDR flag value in ISR register */
+    if(LL_I2C_IsActiveFlag_ADDR(I2C2))
+    {
+        /* Verify the slave transfer direction, a read direction, Slave enters receiver mode */
+        if(LL_I2C_GetTransferDirection(I2C2) == LL_I2C_DIRECTION_READ)
+        {
+            /* Enable Buffer Interrupts */
+            LL_I2C_EnableIT_BUF(I2C2);
+
+            /* Clear ADDR flag value in ISR register */
+            LL_I2C_ClearFlag_ADDR(I2C2);
+        }
+        else
+        {
+            /* Clear ADDR flag value in ISR register */
+            LL_I2C_ClearFlag_ADDR(I2C2);
+        }
+    }
+    /* Check RXNE flag value in ISR register */
+    else if(LL_I2C_IsActiveFlag_RXNE(I2C2))
+    {
+        /* Call function Slave Reception Callback */
+        Slave_Reception_Callback();
+    }
+    /* Check BTF flag value in ISR register */
+    else if(LL_I2C_IsActiveFlag_BTF(I2C2))
+    {
+        /* Call function Slave Reception Callback */
+        Slave_Reception_Callback();
+    }
+    /* Check STOP flag value in ISR register */
+    else if(LL_I2C_IsActiveFlag_STOP(I2C2))
+    {
+        /* Clear STOP flag value in ISR register */
+        LL_I2C_ClearFlag_STOP(I2C2);
+
+        /* Call function Slave Complete Callback */
+        Slave_Complete_Callback();
+    }
+ }
+
+ void I2C2_ER_IRQHandler(void)
+ {
+    /* Call Error function */
+    Error_Callback();
+ }

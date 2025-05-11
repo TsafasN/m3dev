@@ -1,5 +1,17 @@
 #include "main.h"
 
+#include "stdio.h"
+#include "stdbool.h"
+#include "gpio.h"
+#include "i2c.h"
+
+const uint8_t aLedOn[]                  = "LED ON";
+
+volatile uint16_t ubNbDataToTransmit    = sizeof(aLedOn);
+uint8_t* pTransmitBuffer                = (uint8_t*)aLedOn;
+
+uint8_t  aReceiveBuffer[0xF]            = {0};
+
 void SystemClock_Config(void);
 
 int main(void)
@@ -13,6 +25,40 @@ int main(void)
 
     /* Configure the system clock */
     SystemClock_Config();
+
+    /* Initialize LED2 */
+    LED_Init();
+
+    /* Set LED2 Off */
+    LED_Off();
+
+    /* Initialize User push-button in EXTI mode */
+    UserButton_Init();
+
+    const I2C_Handle_t *pI2CHandle1 = NULL;
+    const I2C_Handle_t *pI2CHandle2 = NULL;
+
+    if (I2C_Init(I2C1, &pI2CHandle1) == I2C_ERROR)
+    {
+        Error_Handler();
+    }
+
+    if (I2C_Init(I2C2, &pI2CHandle2) == I2C_ERROR)
+    {
+        Error_Handler();
+    }
+
+    /* Wait for User push-button press to start transfer */
+    WaitForUserButtonPress();
+
+    uint32_t destAddress = 0;
+    I2C_Get_Address(pI2CHandle2, &destAddress);
+
+    I2C_Read_Interrupt(pI2CHandle2, aReceiveBuffer, sizeof(aReceiveBuffer));
+
+    I2C_Write_Polling(pI2CHandle1, destAddress, pTransmitBuffer, ubNbDataToTransmit);
+
+    LED_On();
 
     /* Infinite loop */
     while (1)
@@ -70,4 +116,15 @@ void Error_Handler(void)
     while (1)
     {
     }
+}
+
+void Error_Callback(void)
+{
+    NVIC_DisableIRQ(I2C1_EV_IRQn);
+    NVIC_DisableIRQ(I2C1_ER_IRQn);
+
+    NVIC_DisableIRQ(I2C2_EV_IRQn);
+    NVIC_DisableIRQ(I2C2_ER_IRQn);
+
+    LED_Blinking(LED_BLINK_ERROR);
 }

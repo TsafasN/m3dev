@@ -49,7 +49,8 @@ CFLAGS += \
 else
 # Release build settings
 CFLAGS += \
--O2 \
+-g3 \
+-O0 \
 -DNDEBUG
 endif
 

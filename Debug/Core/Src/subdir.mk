@@ -9,8 +9,8 @@
 #   - *.su:  Size usage information
 #
 # Variables:
-#   - SRC_DIR:  Source directory path
-#   - BUILD_DIR: Output directory path
+#   - CORE_SRC_DIR:  Source directory path
+#   - CORE_BUILD_DIR: Output directory path
 #   - C_SRCS:   List of C source files
 #   - OBJS:     List of object files to be generated
 #   - C_DEPS:   List of dependency files to be generated
@@ -21,18 +21,18 @@
 #
 
 # Directory variables
-SRC_DIR := ../Core/Src
-BUILD_DIR := ./Core/Src
+CORE_SRC_DIR := ../Core/Src
+CORE_BUILD_DIR := ./Core/Src
 
 # Automatically find all C source files
-C_SRCS := $(wildcard $(SRC_DIR)/*.c)
+C_SRCS := $(wildcard $(CORE_SRC_DIR)/*.c)
 
 # Define output files
-OBJS += $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(C_SRCS))
-C_DEPS += $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.d,$(C_SRCS))
+OBJS += $(patsubst $(CORE_SRC_DIR)/%.c,$(CORE_BUILD_DIR)/%.o,$(C_SRCS))
+C_DEPS += $(patsubst $(CORE_SRC_DIR)/%.c,$(CORE_BUILD_DIR)/%.d,$(C_SRCS))
 
 # Rule to build object files from C sources
-$(BUILD_DIR)/%.o $(BUILD_DIR)/%.su: $(SRC_DIR)/%.c $(BUILD_DIR)/subdir.mk
+$(CORE_BUILD_DIR)/%.o $(CORE_BUILD_DIR)/%.su: $(CORE_SRC_DIR)/%.c $(CORE_BUILD_DIR)/subdir.mk
 	$(CC) "$<" $(CFLAGS) -o "$@"
 
 # Clean target that depends on the directory-specific clean
@@ -41,7 +41,7 @@ clean: clean-Core-Src
 # Directory-specific clean target
 # Removes all generated files
 clean-Core-Src:
-	-$(RM) $(BUILD_DIR)/*.d $(BUILD_DIR)/*.o $(BUILD_DIR)/*.su
+	-$(RM) $(CORE_BUILD_DIR)/*.d $(CORE_BUILD_DIR)/*.o $(CORE_BUILD_DIR)/*.su
 	@echo 'Core/Src: Cleaned object files'
 
 .PHONY: clean-Core-Src
