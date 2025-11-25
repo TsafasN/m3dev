@@ -1,0 +1,40 @@
+{
+    "version": "0.2.0",
+    "projectName": "nucleo-f103rb",
+    "configurations": [
+        {
+            "name": "STlink launch",
+            "cwd": "${workspaceFolder}",
+            "executable": "/home/ntsafas/wd/m3dev/Debug/Template.elf",
+            // "executable": "/home/ntsafas/Downloads/en.stm32cubef1/STM32Cube_FW_F1_V1.8.0/Projects/STM32F103RB-Nucleo/Examples_LL/I2C/I2C_OneBoard_Communication_PollingAndIT/SW4STM32/STM32F103RB-Nucleo/Debug/STM32F103RB-Nucleo.elf",
+            // "executable": "/home/ntsafas/STM32CubeIDE/workspace_1.18.0/template_m3/Debug/template_m3.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "stutil",
+            "device": "STM32F103RB",
+            "interface": "swd",
+            // "runToMain": true, // else it starts at reset handler - not interested
+            "preLaunchTask": "Rebuild with Make", // configured in tasks.json
+            // "preLaunchCommands": ["Build all"], // you can execute command instead of task
+            "svdFile": "", // Include svd to watch device peripherals
+            "swoConfig": {}, // currently (v1.7.0) not supported,
+            // "showDevDebugOutput": "raw"
+        },
+        {
+            "name": "STlink attach",
+            "cwd": "${workspaceFolder}",
+            "executable": "/home/ntsafas/wd/m3dev/Debug/Template.elf",
+            // "executable": "/home/ntsafas/Downloads/en.stm32cubef1/STM32Cube_FW_F1_V1.8.0/Projects/STM32F103RB-Nucleo/Examples_LL/I2C/I2C_OneBoard_Communication_PollingAndIT/SW4STM32/STM32F103RB-Nucleo/Debug/STM32F103RB-Nucleo.elf",
+            "request": "attach",
+            "type": "cortex-debug",
+            "servertype": "stutil",
+            "device": "STM32F103RB",
+            "interface": "swd",
+            "runToMain": true, // else it starts at reset handler - not interested
+            // "preLaunchTask": "Rebuild with Make", // configured in tasks.json
+            // "preLaunchCommands": ["Build all"], // you can execute command instead of task
+            "svdFile": "", // Include svd to watch device peripherals
+            "swoConfig": {} // currently (v1.7.0) not supported
+        },
+    ]
+}

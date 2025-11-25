@@ -1,0 +1,10 @@
+{
+    "editor.tabSize": 4,
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+    "files.trimTrailingWhitespace": true,
+    "cortex-debug.liveWatchRefreshRate": 500,
+    "cortex-debug.stutilPath": "/usr/bin/st-util",
+    "cortex-debug.gdbPath": "/opt/arm-toolchain/bin/arm-none-eabi-gdb",
+    "cortex-debug.variableUseNaturalFormat": true,
+}
