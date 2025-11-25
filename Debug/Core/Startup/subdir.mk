@@ -8,11 +8,11 @@
 #   - *.d:   Dependency files for make
 #
 # Variables:
-#   - SRC_DIR:  Source directory path
-#   - BUILD_DIR: Output directory path
-#   - C_SRCS:   List of C source files
-#   - OBJS:     List of object files to be generated
-#   - C_DEPS:   List of dependency files to be generated
+#   - SRC_DIR:  		 Source directory path
+#   - BUILD_DIR_STARTUP: Output directory path
+#   - C_SRCS:   		 List of C source files
+#   - OBJS:     		 List of object files to be generated
+#   - C_DEPS:   		 List of dependency files to be generated
 #
 # Requirements:
 #   - arm-none-eabi-gcc toolchain must be in PATH
@@ -21,17 +21,17 @@
 
 # Directory variables
 SRC_DIR := ../Core/Startup
-BUILD_DIR := ./Core/Startup
+BUILD_DIR_STARTUP := ./Core/Startup
 
 # Automatically find all source files
 S_SRCS := $(wildcard $(SRC_DIR)/*.s)
 
 # Define output files
-OBJS += $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(S_SRCS))
-S_DEPS += $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.d,$(S_SRCS))
+OBJS += $(patsubst $(SRC_DIR)/%.s,$(BUILD_DIR_STARTUP)/%.o,$(S_SRCS))
+S_DEPS += $(patsubst $(SRC_DIR)/%.s,$(BUILD_DIR_STARTUP)/%.d,$(S_SRCS))
 
 # Rule to build object files from S sources
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.s $(BUILD_DIR)/subdir.mk
+$(BUILD_DIR_STARTUP)/%.o: $(SRC_DIR)/%.s $(BUILD_DIR_STARTUP)/subdir.mk
 	$(CC) $(SFLAGS) -o "$@" "$<"
 
 # Clean target that depends on the directory-specific clean
@@ -40,7 +40,7 @@ clean: clean-Core-Startup
 # Directory-specific clean target
 # Removes all generated files
 clean-Core-Startup:
-	-$(RM) $(BUILD_DIR)/*.d $(BUILD_DIR)/*.o
+	-$(RM) $(BUILD_DIR_STARTUP)/*.d $(BUILD_DIR_STARTUP)/*.o
 	@echo 'Core/Startup: Cleaned object files'
 
 .PHONY: clean-Core-Startup

@@ -9,11 +9,11 @@
 #   - *.su:  Size usage information
 #
 # Variables:
-#   - SRC_DIR:  Source directory path
-#   - BUILD_DIR: Output directory path
-#   - C_SRCS:   List of C source files
-#   - OBJS:     List of object files to be generated
-#   - C_DEPS:   List of dependency files to be generated
+#   - SRC_DIR:  		Source directory path
+#   - BUILD_DIR_DRIVERS:Output directory path
+#   - C_SRCS:   		List of C source files
+#   - OBJS:     		List of object files to be generated
+#   - C_DEPS:   		List of dependency files to be generated
 #
 # Requirements:
 #   - arm-none-eabi-gcc toolchain must be in PATH
@@ -22,17 +22,17 @@
 
 # Directory variables
 SRC_DIR := ../Drivers/STM32F1xx_HAL_Driver/Src
-BUILD_DIR := ./Drivers/STM32F1xx_HAL_Driver/Src
+BUILD_DIR_DRIVERS := ./Drivers/STM32F1xx_HAL_Driver/Src
 
 # Automatically find all C source files
 C_SRCS := $(wildcard $(SRC_DIR)/*.c)
 
 # Define output files
-OBJS += $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(C_SRCS))
-C_DEPS += $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.d,$(C_SRCS))
+OBJS += $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR_DRIVERS)/%.o,$(C_SRCS))
+C_DEPS += $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR_DRIVERS)/%.d,$(C_SRCS))
 
 # Rule to build object files from C sources
-$(BUILD_DIR)/%.o $(BUILD_DIR)/%.su: $(SRC_DIR)/%.c $(SRC_DIR)/subdir.mk
+$(BUILD_DIR_DRIVERS)/%.o $(BUILD_DIR_DRIVERS)/%.su: $(SRC_DIR)/%.c $(BUILD_DIR_DRIVERS)/subdir.mk
 	$(CC) "$<" $(CFLAGS) -o "$@"
 
 # Clean target that depends on the directory-specific clean
@@ -41,7 +41,7 @@ clean: clean-Drivers
 # Directory-specific clean target
 # Removes all generated files
 clean-Drivers:
-	-$(RM) $(BUILD_DIR)/*.d $(BUILD_DIR)/*.o $(BUILD_DIR)/*.su
+	-$(RM) $(BUILD_DIR_DRIVERS)/*.d $(BUILD_DIR_DRIVERS)/*.o $(BUILD_DIR_DRIVERS)/*.su
 	@echo 'Drivers: Cleaned object files'
 
 .PHONY: clean-Drivers
