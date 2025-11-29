@@ -12,6 +12,7 @@
 	},
 	"workspaceMount": "source=${localWorkspaceFolder},target=/workspace/${localWorkspaceFolderBasename},type=bind,consistency=cached",
 	"workspaceFolder": "/workspace/${localWorkspaceFolderBasename}",
+	"privileged": true,
 	"mounts": [
 		"source=${localEnv:HOME}/.ssh,target=/home/${localEnv:USER}/.ssh,type=bind,consistency=cached",
 		"source=${localEnv:HOME}/.gitconfig,target=/home/${localEnv:USER}/.gitconfig,type=bind,consistency=cached",
@@ -46,7 +47,10 @@
 				"GitHub.copilot-chat",
 				"GitHub.copilot",
 				"eamodio.gitlens",
-				"mhutchie.git-graph"
+				"mhutchie.git-graph",
+				"ms-azuretools.vscode-docker",
+				"marus25.cortex-debug",
+				"debug-tracker-vscode"
 			]
 		}
 	}
