@@ -6,17 +6,15 @@ FROM ${BASE_IMAGE}
 
 # Default username (can be overridden during build)
 ARG USERNAME=vscode
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
 
 # Switch to root user
 USER root
 
-RUN groupmod --new-name "${USERNAME}" vscode && \
-    usermod --login "${USERNAME}" --move-home --home "/home/${USERNAME}" vscode
-
-# Install ARM toolchain and other dependencies as root
+# Install dependencies as root
 RUN apt-get update && \
     apt-get install -y --no-install-recommends --no-install-suggests \
-        gcc-arm-none-eabi \
         gdb-multiarch \
         openocd \
         make \
@@ -28,8 +26,35 @@ RUN apt-get update && \
         nano \
         strace \
         htop \
+        locales \
+        sudo \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+RUN locale-gen --purge en_US.UTF-8 &&\
+echo 'LANG="en_US.UTF-8"\nLANGUAGE="en_US"\n' > "/etc/default/locale"
+
+RUN groupmod --new-name "${USERNAME}" vscode &&\
+    usermod --login "${USERNAME}" --move-home --home "/home/${USERNAME}" vscode
+
+# Grant sudo access to the user
+RUN echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" > "/etc/sudoers.d/${USERNAME}" &&\
+    chmod 0440 /etc/sudoers.d/${USERNAME}
+
+ARG WGET_LOCATION="/tmp/wget-download"
+RUN mkdir -p "${WGET_LOCATION}"
+
+ARG COMPILER_VERSION="14.3"
+ARG COMPILER_TARGET_URL="https://developer.arm.com/-/media/Files/downloads/gnu/${COMPILER_VERSION}.rel1/binrel/arm-gnu-toolchain-${COMPILER_VERSION}.rel1-x86_64-arm-none-eabi.tar.xz"
+ARG COMPILER_ARTIFACT_NAME="arm-toolchain.tar.xz"
+ARG COMPILER_PATH="/opt/arm-toolchain"
+RUN mkdir -p "${COMPILER_PATH}"
+
+RUN wget "${COMPILER_TARGET_URL}" -O "${WGET_LOCATION}/${COMPILER_ARTIFACT_NAME}" &&\
+    tar xJf "${WGET_LOCATION}/${COMPILER_ARTIFACT_NAME}" -C "${COMPILER_PATH}" &&\
+    mv "${COMPILER_PATH}/arm-gnu-toolchain-${COMPILER_VERSION}.rel1-x86_64-arm-none-eabi"/* "${COMPILER_PATH}/" &&\
+    rm -rf "${WGET_LOCATION}/${COMPILER_ARTIFACT_NAME}"
+ENV PATH="${PATH}:${COMPILER_PATH}/bin"
 
 # Switch to the new user
 USER "${USERNAME}"
