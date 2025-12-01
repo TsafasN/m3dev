@@ -26,6 +26,7 @@ RUN apt-get update && \
         nano \
         strace \
         htop \
+        usbutils \
         locales \
         sudo \
     && apt-get clean \
@@ -34,13 +35,15 @@ RUN apt-get update && \
 RUN locale-gen --purge en_US.UTF-8 &&\
 echo 'LANG="en_US.UTF-8"\nLANGUAGE="en_US"\n' > "/etc/default/locale"
 
+# Create a new user with the specified username, UID, and GID
 RUN groupmod --new-name "${USERNAME}" vscode &&\
     usermod --login "${USERNAME}" --move-home --home "/home/${USERNAME}" vscode
 
 # Grant sudo access to the user
 RUN echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" > "/etc/sudoers.d/${USERNAME}" &&\
-    chmod 0440 /etc/sudoers.d/${USERNAME}
+    chmod 0440 "/etc/sudoers.d/${USERNAME}"
 
+# Set up ARM GCC toolchain
 ARG WGET_LOCATION="/tmp/wget-download"
 RUN mkdir -p "${WGET_LOCATION}"
 
@@ -52,9 +55,18 @@ RUN mkdir -p "${COMPILER_PATH}"
 
 RUN wget "${COMPILER_TARGET_URL}" -O "${WGET_LOCATION}/${COMPILER_ARTIFACT_NAME}" &&\
     tar xJf "${WGET_LOCATION}/${COMPILER_ARTIFACT_NAME}" -C "${COMPILER_PATH}" &&\
-    mv "${COMPILER_PATH}/arm-gnu-toolchain-${COMPILER_VERSION}.rel1-x86_64-arm-none-eabi"/* "${COMPILER_PATH}/" &&\
+    mv "${COMPILER_PATH}/arm-gnu-toolchain-${COMPILER_VERSION}.rel1-x86_64-arm-none-eabi/"* "${COMPILER_PATH}/" &&\
     rm -rf "${WGET_LOCATION}/${COMPILER_ARTIFACT_NAME}"
 ENV PATH="${PATH}:${COMPILER_PATH}/bin"
+
+# Set up Git hooks
+ARG GIT_HOOKS_PATH="/opt/git-hooks"
+RUN mkdir -p "${GIT_HOOKS_PATH}"
+
+RUN  echo ${pwd}
+COPY git/hooks "${GIT_HOOKS_PATH}"
+RUN chmod -R +x "${GIT_HOOKS_PATH}"
+RUN git config --system core.hooksPath "${GIT_HOOKS_PATH}"
 
 # Switch to the new user
 USER "${USERNAME}"
