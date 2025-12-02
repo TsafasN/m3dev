@@ -1,0 +1,21 @@
+version: '3.7'
+
+services:
+  m3dev:
+    build:
+      context: ..
+      dockerfile: images/Dockerfile
+      args:
+        BASE_IMAGE: mcr.microsoft.com/devcontainers/base:ubuntu-22.04
+        USERNAME: ntsafas
+    volumes:
+      - type: bind
+        source: /home/ntsafas/wd/m3dev
+        target: /workspace/m3dev
+        consistency: consistent
+    privileged: true
+    network_mode: "host"
+    user: ntsafas
+    stdin_open: true
+    tty: true
+    command: sleep infinity
