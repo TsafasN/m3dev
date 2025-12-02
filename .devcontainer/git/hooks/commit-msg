@@ -24,7 +24,7 @@ COMMIT_MESSAGE_HEADER=$(head -n 1 "${COMMIT_MESSAGE_FILENAME}")
 COMMIT_MESSAGE_PATTERN="^((main|develop)|(feat|fix|infra|docs|style|refactor|test|chore)): .{4,}"
 
 BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
-BRANCH_NAME_PATTERN="^(main|develop)|(([^/]+\/)*(feat|fix|docs|style|refactor|test|chore)\/.{4,})"
+BRANCH_NAME_PATTERN="^(main|develop)|(([^\/]+\/)*(feat|fix|infra|docs|style|refactor|test|chore)\/.{4,})"
 
 echo ""
 echo "[Git Hook] - [commit-msg]:"
