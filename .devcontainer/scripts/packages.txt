@@ -1,0 +1,13 @@
+gdb-multiarch
+openocd
+qemu-system-arm
+make
+cmake
+git
+curl
+wget
+vim
+nano
+strace
+htop
+usbutils
