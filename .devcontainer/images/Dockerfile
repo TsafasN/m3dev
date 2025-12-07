@@ -17,6 +17,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends --no-install-suggests \
         gdb-multiarch \
         openocd \
+        qemu-system-arm \
         make \
         cmake \
         git \

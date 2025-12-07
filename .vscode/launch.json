@@ -1,24 +1,60 @@
 {
+    // https://github.com/Marus/cortex-debug/blob/master/debug_attributes.md
     "version": "0.2.0",
     "projectName": "nucleo-f103rb",
     "configurations": [
         {
-            "name": "STlink launch",
+            "name": "OpenOCD STlink launch",
             "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "executable": "/workspace/m3dev/Debug/Template.elf",
             "type": "cortex-debug",
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "Rebuild with Make",
+            // OpenOCD + ST-Link
+            "device": "STM32F103RB",
             "servertype": "openocd",
             "serverpath": "/usr/bin/openocd",
             "configFiles": [
                 "interface/stlink.cfg",
                 "target/stm32f1x.cfg"
             ],
-            "gdbPath": "/usr/bin/gdb-multiarch",
-            "device": "STM32F103RB",
+            // "preLaunchCommands": [
+            //     "set mem inaccessible-by-default off",
+            //     "monitor reset"
+            // ],
+            // "postLaunchCommands": [
+            //     "monitor reset init",
+            //     "monitor sleep 200"
+            // ],
+            // GDB and ELF
             "armToolchainPath": "/opt/arm-toolchain/bin/",
+            "gdbPath": "/usr/bin/gdb-multiarch",
+            "executable": "/workspace/m3dev/Debug/Template.elf",
+            //
             "breakAfterReset": true,
-            "preLaunchTask": "Rebuild with Make",
+            // "runToEntryPoint": "main",
         },
+        {
+            "name": "QEMU Launch",
+            "request": "launch",
+            "type": "cortex-debug",
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "Rebuild with Make",
+            // QEMU
+            "servertype": "qemu",
+            "machine": "netduino2",
+            "cpu": "cortex-m3",
+            // "postLaunchCommands": [
+            //     "target remote localhost:1234",
+            //     "info registers"
+            // ],
+            // GDB and ELF
+            "armToolchainPath": "/opt/arm-toolchain/bin/",
+            "gdbPath": "/usr/bin/gdb-multiarch",
+            "executable": "/workspace/m3dev/Debug/Template.elf",
+            //
+            // "breakAfterReset": true,
+            // For externally controlled GDB Servers (servertype = "external")
+            // "gdbTarget": "localhost:1234",
+        }
     ]
 }
