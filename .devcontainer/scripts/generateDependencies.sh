@@ -3,8 +3,6 @@
 # Input: packages.txt (one package per line)
 # Output: dependencies.txt (package name, version, URL)
 
-set -e
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PACKAGES_FILE="${1:-${SCRIPT_DIR}/packages.txt}"
 OUTPUT_FILE="${SCRIPT_DIR}/dependencies.txt"
@@ -42,10 +40,6 @@ sort -u "${TEMP_DEPS}" -o "${TEMP_DEPS}"
 
 echo -e "\nGetting package URLs and versions..."
 
-# Update apt cache first
-echo "Updating apt cache..."
-apt-get update -qq 2>/dev/null || echo "Warning: Could not update apt cache (may need sudo)"
-
 # Now get URLs and versions for all packages
 while IFS= read -r package; do
     echo "Fetching info for: $package"
@@ -74,18 +68,29 @@ done < "${TEMP_DEPS}"
 # Sort and output
 sort -u "${TEMP_URLS}" > "${OUTPUT_FILE}"
 
-# Clean up
-rm -f "${TEMP_DEPS}" "${TEMP_URLS}"
-
 echo -e "\nDependencies written to ${OUTPUT_FILE}"
 echo "Total packages: $(wc -l < ${OUTPUT_FILE})"
+
+# Check for conflicts
+echo -e "\nChecking for package conflicts..."
+conflicts_found=0
+while read pkg; do
+    conflicts=$(apt show "$pkg" 2>/dev/null | grep "^Conflicts:")
+    if [ -n "$conflicts" ]; then
+        echo "  $pkg: $conflicts"
+        conflicts_found=$((conflicts_found + 1))
+    fi
+done < <(awk -F'\t' '{print $1}' "${OUTPUT_FILE}")
+
+if [ $conflicts_found -eq 0 ]; then
+    echo "  No conflicts detected"
+else
+    echo "  Warning: Found $conflicts_found package(s) with conflicts"
+fi
 
 # Show summary
 echo -e "\nPackage summary (name | version | url):"
 column -t -s $'\t' "${OUTPUT_FILE}" | head -20
-if [ $(wc -l < "${OUTPUT_FILE}") -gt 20 ]; then
-    echo "... (showing first 20 of $(wc -l < ${OUTPUT_FILE}) packages)"
-fi
 
 # Download packages
 echo -e "\nDownloading packages to ${DOWNLOAD_DIR}..."
@@ -129,3 +134,6 @@ echo -e "\nDownload complete!"
 echo "Downloaded: $downloaded packages"
 echo "Failed: $failed packages"
 echo "Location: ${DOWNLOAD_DIR}"
+
+# Clean up temp files at the end
+rm -f "${TEMP_DEPS}" "${TEMP_URLS}"
