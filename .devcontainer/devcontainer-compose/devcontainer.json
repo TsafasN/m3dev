@@ -25,7 +25,7 @@
 		"gpu": "optional"
 	},
 	"mounts": [
-		"source=${env:SSH_AUTH_SOCK},target=/ssh-agent,type=bind,consistency=consistent",
+		"source=${localEnv:HOME}/.ssh,target=/home/${localEnv:USER}/.ssh,type=bind,consistency=consistent",
 		"source=${localEnv:HOME}/.gitconfig,target=/home/${localEnv:USER}/.gitconfig,type=bind,consistency=consistent",
 		"source=${localEnv:HOME}/.bash_history,target=/home/${localEnv:USER}/.bash_history,type=bind,consistency=consistent",
 		"source=${localEnv:HOME}/.bashrc,target=/home/${localEnv:USER}/.bashrc,type=bind,consistency=consistent"
